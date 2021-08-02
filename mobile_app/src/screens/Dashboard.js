@@ -119,7 +119,7 @@ class Dashboard extends React.Component {
 
   renderCard = (props, index) => {
     const gradientColors = index % 2 ? GRADIENT_BLUE : GRADIENT_PINK;
-
+    console.log(gradientColors)
     return (
       <Block row center card shadow space="between" style={styles.card} key={props.title}>
         <Gradient
@@ -146,10 +146,11 @@ class Dashboard extends React.Component {
       </Block>
     );
   }
-
+  
   renderCards = () => cards.map((card, index) => this.renderCard(card, index))
 
   render() {
+    console.log(cards)
     return (
       <Block safe flex>
         {/* header */}
@@ -158,10 +159,11 @@ class Dashboard extends React.Component {
         {/* stats */}
         {this.renderStats()}
 
-        {/* cards */}
+        {/* 
         <ScrollView style={{ flex: 1 }}>
           {this.renderCards()}
         </ScrollView>
+         */}
       </Block>
     );
   }
