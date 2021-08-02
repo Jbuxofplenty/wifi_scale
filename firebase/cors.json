@@ -1,0 +1,22 @@
+[
+  {
+    "origin": ["http://127.0.0.1:8111", "http://localhost:8111", "http://jbuxofplenty-mac.local:8111"],
+    "method": ["GET", "POST", "HEAD", "DELETE"],
+    "maxAgeSeconds": 3600
+  },
+  {
+    "origin": ["https://stemic-c4acc.web.app"],
+    "method": ["GET"],
+    "maxAgeSeconds": 3600
+  },
+  {
+    "origin": ["https://www.stemicllc.com"],
+    "method": ["GET"],
+    "maxAgeSeconds": 3600
+  },
+  {
+    "origin": ["https://stemicllc.com"],
+    "method": ["GET"],
+    "maxAgeSeconds": 3600
+  }
+]
