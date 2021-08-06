@@ -6,6 +6,10 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+# Sensitive data
+offline
+private-key.der
+
 # Mac
 .DS_Store
 

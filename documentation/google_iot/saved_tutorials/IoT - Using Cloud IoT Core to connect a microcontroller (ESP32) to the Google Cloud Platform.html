@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<!-- saved from url=(0064)http://nilhcem.com/iot/cloud-iot-core-with-the-esp32-and-arduino -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>IoT - Using Cloud IoT Core to connect a microcontroller (ESP32) to the Google Cloud Platform</title>
+  <meta name="description" content="In the previous post, we used an ESP8266 to collect and send temperature + humidity data to a locally hosted Raspberry Pi.">
+
+  <link rel="stylesheet" href="./IoT - Using Cloud IoT Core to connect a microcontroller (ESP32) to the Google Cloud Platform_files/main.css">
+  <link rel="canonical" href="http://nilhcem.com/iot/cloud-iot-core-with-the-esp32-and-arduino">
+  <link rel="alternate" type="application/rss+xml" title="android stuff &amp; co." href="http://nilhcem.com/feed.xml">
+
+  <link rel="icon" href="http://nilhcem.com/assets/favicon.ico" sizes="32x32">
+  <link rel="icon" href="http://nilhcem.com/assets/favicon-192.png" sizes="192x192">
+  <link rel="apple-touch-icon" href="http://nilhcem.com/assets/favicon-192.png" sizes="192x192">
+
+  
+  <script async="" src="./IoT - Using Cloud IoT Core to connect a microcontroller (ESP32) to the Google Cloud Platform_files/analytics.js"></script><script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-91564367-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+  
+
+  
+<script src="./IoT - Using Cloud IoT Core to connect a microcontroller (ESP32) to the Google Cloud Platform_files/embed.js" data-timestamp="1628104133481"></script><link rel="prefetch" as="style" href="https://c.disquscdn.com/next/embed/styles/lounge.e16bb81d3982e913e07bd7f31be71a6c.css"><link rel="prefetch" as="script" href="https://c.disquscdn.com/next/embed/common.bundle.ee2555081038338ea4f41cbb3ea1bc17.js"><link rel="prefetch" as="script" href="https://c.disquscdn.com/next/embed/lounge.bundle.106faac21c6c76e0298d1a260d46eaf3.js"><link rel="prefetch" as="script" href="https://disqus.com/next/config.js"><script async="" id="dsq_recs_scr" src="./IoT - Using Cloud IoT Core to connect a microcontroller (ESP32) to the Google Cloud Platform_files/recommendations.js"></script><link rel="prefetch" as="style" href="https://c.disquscdn.com/next/recommendations/styles/recommendations.eff219b98b7c4167b4b289065f36f391.css"><link rel="prefetch" as="script" href="https://c.disquscdn.com/next/recommendations/common.bundle.72e35017d98ea7f210961b0d5c38444a.js"><link rel="prefetch" as="script" href="https://c.disquscdn.com/next/recommendations/recommendations.bundle.37a289e2ed6acdf6cbf01e83d4fb3ce6.js"><link rel="prefetch" as="script" href="https://disqus.com/next/config.js"><script src="./IoT - Using Cloud IoT Core to connect a microcontroller (ESP32) to the Google Cloud Platform_files/alfie_v4.63f1ab6d6b9d5807dc0c94ef3fe0b851.js" async="" charset="UTF-8"></script></head>
+
+
+  <body>
+
+    <header class="site-header" role="banner">
+  <div class="wrapper">
+    <a class="site-title" href="http://nilhcem.com/">android stuff &amp; co.</a>
+  </div>
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">IoT - Using Cloud IoT Core to connect a microcontroller (ESP32) to the Google Cloud Platform</h1>
+    <p class="post-meta"><time datetime="2019-03-02T00:00:00+00:00" itemprop="datePublished">Mar 2, 2019</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>In the <a href="http://nilhcem.com/iot/home-monitoring-with-mqtt-influxdb-grafana">previous post</a>, we used an <strong>ESP8266</strong> to collect and send temperature + humidity data to a locally hosted Raspberry Pi.</p>
+
+<p>Now, let’s imagine we have <strong>thousands of sensors</strong>, collecting various data all around us.<br>
+A solution that scale would be to have these microcontrollers sending data securely to the Cloud.<br>
+This is what we will achieve today, connecting an ESP32 to Cloud IoT Core, and using Google Kubernetes Engine to host InfluxDB and Grafana instances, so we can access sensor data from anywhere.</p>
+
+<p>A video example of what will be achieved can be seen here:</p>
+
+<iframe width="750" height="420" src="./IoT - Using Cloud IoT Core to connect a microcontroller (ESP32) to the Google Cloud Platform_files/dRnUR_iX8Fo.html" frameborder="0" allowfullscreen=""></iframe>
+<p><br></p>
+
+<h2 id="esp32">ESP32</h2>
+
+<p>We will use an ESP32, which is a $5 microcontroller with Wi-Fi &amp; dual-mode Bluetooth capabilities.<br>
+It is a successor to the ESP8266, with a faster CPU <em>(dual-core @ 160 or 240 MHz)</em>, more ram <em>(520 KiB SRAM)</em>, Bluetooth 4.2+BLE support, and  <strong>cryptographic hardware acceleration</strong> <em>(AES, SHA-2, RSA, ECC, RNG</em>), which is very interesting for us, as we want data to be encrypted before being sent to the Cloud.</p>
+
+<p><img src="./IoT - Using Cloud IoT Core to connect a microcontroller (ESP32) to the Google Cloud Platform_files/01_esp32.jpg" alt="pic01_esp32"></p>
+
+<p>The ESP32 will communicate with a BME280 temperature &amp; humidity sensor.<br>
+To prototype quickly, we will use the Arduino IDE to write code for the ESP32.<br>
+We will print temperature data to the Serial, and use the <code class="language-plaintext highlighter-rouge">Serial Plotter</code> feature from the Arduino IDE (available in the <code class="language-plaintext highlighter-rouge">Tools</code> menu) to have a visual representation of the data:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="n">bme</span><span class="p">.</span><span class="n">readTemperature</span><span class="p">());</span>
+  <span class="n">delay</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><img src="./IoT - Using Cloud IoT Core to connect a microcontroller (ESP32) to the Google Cloud Platform_files/02_serial-plotter.png" alt="pic02_serial-plotter"></p>
+
+<p><a href="https://github.com/Nilhcem/esp32-cloud-iot-core-k8s/tree/master/01-esp32_bme280">Complete implementation available on this link</a>
+<br><br></p>
+
+<h2 id="google-cloud-iot-core">Google Cloud IoT Core</h2>
+
+<p>Connecting a single device to a remote service is quite an easy thing.<br>
+However, when you start having thousands of devices, you need a secure and cost-saving solution that helps you manage all your devices easily and dealing with all the received data.</p>
+
+<p>Cloud IoT Core is a fully managed service that allows you to easily and securely connect large fleets of devices directly to the Google Cloud.
+By connecting microcontrollers to the cloud, you potentially transform these limited devices into hugely smart products.</p>
+
+<p>We have to think of Cloud IoT Core as an entry point to the Google Cloud Platform for IoT devices.</p>
+
+<p>It is composed of two main components, a device manager and a protocol bridge:</p>
+<ul>
+  <li>The <strong>device manager</strong> helps establishing the identity of a device and provides the mechanism for authenticating a device when connecting. It also maintains a logical configuration of each device and can be used to remotely control any device from the cloud.</li>
+  <li>The <strong>protocol bridge</strong> is the way for your device to access the Google Cloud through standard protocols such as MQTT and HTTP, so you can use your existing devices with minimal firmware changes.
+<br><br></li>
+</ul>
+
+<p>The protocol bridge publishes all device telemetry to Cloud Pub/Sub</p>
+
+<p><img src="./IoT - Using Cloud IoT Core to connect a microcontroller (ESP32) to the Google Cloud Platform_files/03_gcp-simplified.png" alt="pic03_gcp-simplified"></p>
+
+<p>Once the data is in Pub/Sub, it is in the Google Cloud, and you can consume it the way you want.
+We will use a Google Cloud Function to transmit that data from Pub/Sub to a time-series database (InfluxDB) located in a GKE cluster.</p>
+
+<p><img src="./IoT - Using Cloud IoT Core to connect a microcontroller (ESP32) to the Google Cloud Platform_files/04_gcp-final.png" alt="pic04_gcp-final"></p>
+
+<p>But first, we need to connect our microcontroller to Cloud IoT Core.
+<br><br></p>
+
+<h2 id="connecting-an-esp32-to-cloud-iot-core">Connecting an ESP32 to Cloud IoT Core</h2>
+
+<p>Before using Cloud IoT core, we first have to create a Google Cloud project, and enable Cloud IoT Core and Pub/Sub APIs. This can be done either from the <a href="http://console.cloud.google.com/">web console</a>, or using the <a href="https://cloud.google.com/sdk/">gcloud</a> command-line tool, which we will be using <em>(If you have any issue, refer to the <a href="https://cloud.google.com/iot/docs/quickstart">quick start guide</a>)</em></p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">export </span><span class="nv">PROJECT_ID</span><span class="o">=</span><span class="s2">"&lt;your-project-id&gt;"</span>
+
+<span class="c"># Authorize gcloud to access the Cloud Platform with Google user credentials</span>
+gcloud auth login
+
+<span class="c"># Create a new project</span>
+gcloud projects create <span class="nv">$PROJECT_ID</span>
+
+<span class="c"># Set default project</span>
+gcloud config <span class="nb">set </span>project <span class="nv">$PROJECT_ID</span>
+
+<span class="c"># Enable Cloud Pub/Sub</span>
+gcloud services <span class="nb">enable </span>pubsub.googleapis.com
+
+<span class="c"># Open this URL to enable billing (required for Cloud IoT)</span>
+open <span class="s2">"https://console.cloud.google.com/iot/api?project=</span><span class="nv">$PROJECT_ID</span><span class="s2">"</span>
+
+<span class="c"># Enable Cloud IoT</span>
+gcloud services <span class="nb">enable </span>cloudiot.googleapis.com
+
+<span class="c"># Give permission to Cloud IoT Core to publish messages on Cloud Pub/Sub</span>
+gcloud projects add-iam-policy-binding <span class="nv">$PROJECT_ID</span> <span class="se">\</span>
+  <span class="nt">--member</span><span class="o">=</span>serviceAccount:cloud-iot@system.gserviceaccount.com <span class="se">\</span>
+  <span class="nt">--role</span><span class="o">=</span>roles/pubsub.publisher
+</code></pre></div></div>
+
+<p>Messages received from Cloud IoT Core will be automatically forwarded to a Pub/Sub topic.<br>
+As you have guessed, we should create a Pub/Sub topic, and a subscription:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">export </span><span class="nv">PUBSUB_TOPIC</span><span class="o">=</span><span class="s2">"iotcore-topic"</span>
+<span class="nb">export </span><span class="nv">PUBSUB_SUBSCRIPTION</span><span class="o">=</span><span class="s2">"iotcore-subscription"</span>
+
+gcloud pubsub topics create <span class="nv">$PUBSUB_TOPIC</span>
+gcloud pubsub subscriptions create <span class="nv">$PUBSUB_SUBSCRIPTION</span> <span class="nt">--topic</span> <span class="nv">$PUBSUB_TOPIC</span>
+</code></pre></div></div>
+
+<p>It is now time to create a <strong>device registry</strong>. A registry is like a bucket for your IoT devices.<br>
+It allows you to group devices and set properties that they all share, such as connection protocol, data storage location, and Cloud Pub/Sub topics</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">export </span><span class="nv">REGISTRY_NAME</span><span class="o">=</span><span class="s2">"iotcore-registry"</span>
+<span class="c"># Choose your region: https://cloud.google.com/compute/docs/regions-zones/</span>
+<span class="c"># Valid cloud regions are [asia-east1, europe-west1, us-central1]</span>
+<span class="nb">export </span><span class="nv">REGION_NAME</span><span class="o">=</span><span class="s2">"&lt;region-name&gt;"</span>
+
+<span class="c"># Create Cloud IoT registry specifying Cloud Pub/Sub topic name</span>
+gcloud iot registries create <span class="nv">$REGISTRY_NAME</span> <span class="se">\</span>
+  <span class="nt">--region</span><span class="o">=</span><span class="nv">$REGION_NAME</span> <span class="se">\</span>
+  <span class="nt">--event-notification-config</span><span class="o">=</span><span class="nv">topic</span><span class="o">=</span><span class="nv">$PUBSUB_TOPIC</span> <span class="se">\</span>
+  <span class="nt">--enable-mqtt-config</span> <span class="nt">--enable-http-config</span>
+</code></pre></div></div>
+
+<p>We have enabled both the MQTT and the HTTP bridge.<br>
+The HTTP bridge is only enabled here for the example. We actually don’t need it for this project.</p>
+
+<p>The registry has been created and is visible in the web console (<a href="https://console.cloud.google.com/iot/registries">https://console.cloud.google.com/iot/registries</a>):</p>
+
+<p><img src="./IoT - Using Cloud IoT Core to connect a microcontroller (ESP32) to the Google Cloud Platform_files/05_gcp-registry.png" alt="pic05_gcp-registry"></p>
+
+<p>Now that we have a device registry, we can register a device (our ESP32) in that registry:</p>
+
+<p>Devices will authenticate to the bridge using a Json Web Token (JWT).<br>
+Cloud IoT Core uses public key authentication, and supports the RSA and Elliptic Curve algorithms.<br>
+We will generate key pairs, and create a new device using the newly generated public key:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">export </span><span class="nv">DEVICE_NAME</span><span class="o">=</span><span class="s2">"esp32"</span>
+
+<span class="c"># Generate an Eliptic Curve (EC) ES256 private / public key pair</span>
+openssl ecparam <span class="nt">-genkey</span> <span class="nt">-name</span> prime256v1 <span class="nt">-noout</span> <span class="nt">-out</span> ec_private.pem
+openssl ec <span class="nt">-in</span> ec_private.pem <span class="nt">-pubout</span> <span class="nt">-out</span> ec_public.pem
+
+<span class="c"># Create a new Cloud IoT device</span>
+gcloud iot devices create <span class="nv">$DEVICE_NAME</span> <span class="se">\</span>
+  <span class="nt">--region</span><span class="o">=</span><span class="nv">$REGION_NAME</span> <span class="se">\</span>
+  <span class="nt">--registry</span><span class="o">=</span><span class="nv">$REGISTRY_NAME</span> <span class="se">\</span>
+  <span class="nt">--public-key</span><span class="o">=</span><span class="s2">"path=./ec_public.pem,type=es256"</span>
+</code></pre></div></div>
+
+<p>Our device is created and visible in the web console:</p>
+
+<p><img src="./IoT - Using Cloud IoT Core to connect a microcontroller (ESP32) to the Google Cloud Platform_files/06_gcp-device.png" alt="pic06_gcp-device">
+<br></p>
+
+<h2 id="connecting-to-the-http--mqtt-bridges">Connecting to the HTTP / MQTT bridges</h2>
+
+<p>One of the advantages of Cloud IoT Core is that you can connect constraint devices such as MCUs using MQTT or HTTP.<br>
+This is very convenient, as size is limited on microcontrollers and often, you can’t afford to include or create a proprietary heavy library or SDK to your project.<br>
+Since MQTT and HTTP are industry standard protocols, there are great chances that those are already supported by your devices.</p>
+
+<p>In this section, we will try both bridges from our computer, using curl <em>(for the HTTP bridge)</em> and mosquitto <em>(for the MQTT bridge)</em>.
+<br><br></p>
+
+<h3 id="http-bridge">HTTP Bridge</h3>
+
+<p>To send telemetry events to the Cloud using the HTTP bridge, you have to send a POST request containing base64 encoded data to a given URL.<br>
+The request must contain an <code class="language-plaintext highlighter-rouge">authorization</code> header with a valid JWT generated using your device’s private key (<a href="https://github.com/Nilhcem/esp32-cloud-iot-core-k8s/tree/master/04-generate-jwt/">this script</a> can help generate one).</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Generate the JWT</span>
+<span class="nv">$ </span>./main.py
+b<span class="s1">'&lt;your-jwt-token&gt;'</span>
+
+<span class="c"># Encode data in base64</span>
+<span class="nv">$ </span><span class="nb">echo</span> <span class="s2">"hello"</span> | <span class="nb">base64
+</span>aGVsbG8K
+
+<span class="c"># Send the POST request</span>
+<span class="nv">$ </span>curl <span class="nt">-X</span> POST <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s1">'authorization: Bearer &lt;your-jwt-token&gt;'</span> <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s1">'content-type: application/json'</span> <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s1">'cache-control: no-cache'</span> <span class="se">\</span>
+  <span class="nt">--data</span> <span class="s1">'{"binary_data": "aGVsbG8K"}'</span> <span class="se">\</span>
+  <span class="s1">'https://cloudiotdevice.googleapis.com/v1/projects/&lt;your-project-id&gt;/locations/&lt;region-name&gt;/registries/iotcore-registry/devices/&lt;device-name&gt;:publishEvent'</span>
+<span class="o">{}</span>
+</code></pre></div></div>
+
+<p>To verify that it works, you can pull the Pub/Sub subscription:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>gcloud pubsub subscriptions pull <span class="nt">--auto-ack</span> <span class="nv">$PUBSUB_SUBSCRIPTION</span> <span class="nt">--limit</span><span class="o">=</span>1
+┌───────┬─────────────────┬─────────────────────────────────────┐
+│  DATA │    MESSAGE_ID   │              ATTRIBUTES             │
+├───────┼─────────────────┼─────────────────────────────────────┤
+│ hello │ 410723114212418 │ <span class="nv">deviceId</span><span class="o">=</span>esp32                      │
+│       │                 │ <span class="nv">deviceNumId</span><span class="o">=</span>1241241241241241        │
+│       │                 │ <span class="nv">deviceRegistryId</span><span class="o">=</span>iotcore-registry   │
+│       │                 │ <span class="nv">deviceRegistryLocation</span><span class="o">=</span>europe-west1 │
+│       │                 │ <span class="nv">projectId</span><span class="o">=</span>&lt;your-project-id&gt;         │
+│       │                 │ <span class="nv">subFolder</span><span class="o">=</span>                          │
+└───────┴─────────────────┴─────────────────────────────────────┘
+</code></pre></div></div>
+<p><em>It may take a few seconds to be visible, try again to pull the pubsub subscription, if you don’t see any data.</em></p>
+
+<p>As you have seen, this is very easy for any device to send data securely in the Google Cloud, using the HTTP bridge from Cloud IoT core.<br>
+However, it is recommended, if possible, to use the MQTT bridge instead, as the protocol is more optimized for the IoT.
+<br><br></p>
+
+<h3 id="mqtt-bridge">MQTT Bridge</h3>
+
+<p>We will be using Mosquitto to test the MQTT bridge on our computer before writing some microcontroller code.<br>
+This time, the JWT has to be passed in the <code class="language-plaintext highlighter-rouge">password</code> field; the <code class="language-plaintext highlighter-rouge">username</code> won’t be checked as all the information is in the JWT, so we can set the username to any value (such as <code class="language-plaintext highlighter-rouge">"unused"</code> for instance).</p>
+
+<p>IoT core does all the encrypted communication through TLS1.2 or higher to ensure that all of your devices are secure when they’re talking to the cloud.<br>
+Make sure to specify the CA file, by downloading roots certificates and providing those to your MQTT client:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># First, download root certificates</span>
+<span class="nv">$ </span>curl https://pki.goog/roots.pem <span class="o">&gt;</span> roots.pem
+
+<span class="c"># Use Mosquitto to publish a message to the MQTT bridge</span>
+mosquitto_pub <span class="se">\</span>
+<span class="nt">--host</span> mqtt.googleapis.com <span class="se">\</span>
+<span class="nt">--port</span> 8883 <span class="se">\</span>
+<span class="nt">--id</span> projects/&lt;your-project-id&gt;/locations/&lt;region-name&gt;/registries/iotcore-registry/devices/&lt;device-name&gt; <span class="se">\</span>
+<span class="nt">--username</span> unused <span class="se">\</span>
+<span class="nt">--pw</span> <span class="s2">"&lt;your-jwt-token&gt;"</span> <span class="se">\</span>
+<span class="nt">--cafile</span> ./roots.pem <span class="se">\</span>
+<span class="nt">--tls-version</span> tlsv1.2 <span class="se">\</span>
+<span class="nt">--protocol-version</span> mqttv311 <span class="se">\</span>
+<span class="nt">--debug</span> <span class="se">\</span>
+<span class="nt">--qos</span> 1 <span class="se">\</span>
+<span class="nt">--topic</span> /devices/&lt;device-name&gt;/events <span class="se">\</span>
+<span class="nt">--message</span> <span class="s2">"Hello MQTT"</span>
+</code></pre></div></div>
+
+<p>Again, you can pull the MQTT subscription to verify that it works:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>gcloud pubsub subscriptions pull <span class="nt">--auto-ack</span> <span class="nv">$PUBSUB_SUBSCRIPTION</span> <span class="nt">--limit</span><span class="o">=</span>1
+┌────────────┬─────────────────┬─────────────────────────────────────┐
+│    DATA    │    MESSAGE_ID   │              ATTRIBUTES             │
+├────────────┼─────────────────┼─────────────────────────────────────┤
+│ Hello MQTT │ 410700146251251 │ <span class="nv">deviceId</span><span class="o">=</span>esp32                      │
+│            │                 │ <span class="nv">deviceNumId</span><span class="o">=</span>3069493838977348        │
+│            │                 │ <span class="nv">deviceRegistryId</span><span class="o">=</span>iotcore-registry   │
+│            │                 │ <span class="nv">deviceRegistryLocation</span><span class="o">=</span>europe-west1 │
+│            │                 │ <span class="nv">projectId</span><span class="o">=</span>&lt;your-project-id&gt;         │
+│            │                 │ <span class="nv">subFolder</span><span class="o">=</span>                          │
+└────────────┴─────────────────┴─────────────────────────────────────┘
+</code></pre></div></div>
+<p><br></p>
+
+<h2 id="connecting-the-esp32-to-cloud-iot-core">Connecting the ESP32 to Cloud IoT Core</h2>
+
+<p>We will be using the MQTT bridge, which means that our microcontroller code will need an MQTT client, and a way to generate a JWT from a given private key.<br>
+We could write some code for that, but hopefully some very lightweight libraries and SDKs already exist to speed up and simplify the integration between a device and Cloud IoT Core.</p>
+
+<p>The recommended way to connect a device to Google Cloud IoT Core is to use the <strong><a href="https://github.com/GoogleCloudPlatform/iot-device-sdk-embedded-c">Cloud IoT Device SDK</a></strong>, which consists of client libraries written in Embedded C that enable developers to securely connect, provision, and manage devices with Cloud IoT Core.<br>
+You can find on <a href="https://github.com/espressif/esp-google-iot/">this repository</a> a sample project that demonstrates how to use the Cloud IoT Device SDK on the ESP32, using ESP-IDF (FreeRTOS), if you are interested.</p>
+
+<p>In this blog post, we won’t be using the Cloud IoT SDK though, as there is an easier way to integrate Cloud IoT Core to an Arduino project, by using the <a href="https://github.com/GoogleCloudPlatform/google-cloud-iot-arduino">google-cloud-iot-arduino</a> and the <a href="https://github.com/256dpi/arduino-mqtt">arduino-mqtt</a> libraries.</p>
+
+<p>After importing the Arduino libraries, we will call the <code class="language-plaintext highlighter-rouge">setupCloudIoT</code> to setup the Wi-Fi, the device time, and to start an MQTT client.<br>
+In the main loop, we need to maintain the MQTT connection, and call <code class="language-plaintext highlighter-rouge">publishTelemetry</code> every minute to send temperature + humidity data to Cloud IoT Core:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">lastMillis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">bme</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="n">BME280_ADDRESS</span><span class="p">);</span>
+  <span class="n">setupCloudIoT</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">mqttClient</span><span class="o">-&gt;</span><span class="n">loop</span><span class="p">();</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">mqttClient</span><span class="o">-&gt;</span><span class="n">connected</span><span class="p">())</span> <span class="p">{</span>
+    <span class="n">connect</span><span class="p">();</span>
+  <span class="p">}</span>
+
+  <span class="c1">// publish a message roughly every minute.</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">millis</span><span class="p">()</span> <span class="o">-</span> <span class="n">lastMillis</span> <span class="o">&gt;</span> <span class="mi">60000</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">lastMillis</span> <span class="o">=</span> <span class="n">millis</span><span class="p">();</span>
+
+    <span class="n">String</span> <span class="n">payload</span> <span class="o">=</span>
+      <span class="n">String</span><span class="p">(</span><span class="s">"{</span><span class="se">\"</span><span class="s">timestamp</span><span class="se">\"</span><span class="s">:"</span><span class="p">)</span> <span class="o">+</span> <span class="n">time</span><span class="p">(</span><span class="n">nullptr</span><span class="p">)</span> <span class="o">+</span>
+      <span class="n">String</span><span class="p">(</span><span class="s">",</span><span class="se">\"</span><span class="s">temperature</span><span class="se">\"</span><span class="s">:"</span><span class="p">)</span> <span class="o">+</span> <span class="n">bme</span><span class="p">.</span><span class="n">readTemperature</span><span class="p">()</span> <span class="o">+</span>
+      <span class="n">String</span><span class="p">(</span><span class="s">",</span><span class="se">\"</span><span class="s">humidity</span><span class="se">\"</span><span class="s">:"</span><span class="p">)</span> <span class="o">+</span> <span class="n">bme</span><span class="p">.</span><span class="n">readHumidity</span><span class="p">()</span> <span class="o">+</span>
+      <span class="n">String</span><span class="p">(</span><span class="s">"}"</span><span class="p">);</span>
+    <span class="n">publishTelemetry</span><span class="p">(</span><span class="n">payload</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Complete implementation available below <em>(choose the one you prefer)</em>:</p>
+
+<ul>
+  <li>
+    <p><strong>Arduino implementation</strong> <em>(using the “Google Cloud IoT Core JWT” and “Arduino MQTT” libraries)</em>:<br>
+<a href="https://github.com/Nilhcem/esp32-cloud-iot-core-k8s/tree/master/02-esp32_bme280_ciotc_arduino">https://github.com/Nilhcem/esp32-cloud-iot-core-k8s/tree/master/02-esp32_bme280_ciotc_arduino</a></p>
+  </li>
+  <li>
+    <p><strong>ESP-IDF (FreeRTOS) implementation</strong> <em>(using the “Cloud IoT Device SDK”)</em>:<br>
+<a href="https://github.com/Nilhcem/esp32-cloud-iot-core-k8s/tree/master/03-esp32_bme280_ciotc_esp-idf">https://github.com/Nilhcem/esp32-cloud-iot-core-k8s/tree/master/03-esp32_bme280_ciotc_esp-idf</a>
+<br><br></p>
+  </li>
+</ul>
+
+<h2 id="deploy-influxdb-and-grafana-to-gke">Deploy InfluxDB and Grafana to GKE</h2>
+
+<p>Data will be persisted to an InfluxDB instance, so it can be viewed using Grafana (as we saw in the earlier video). Both instances are stored in Google Cloud. <br>
+To easily deploy InfluxDB and Grafana instances to the Google Cloud, you could use <a href="https://cloud.google.com/marketplace/?hl=fr">Google Cloud Platform Marketplace</a> (Google Click to Deploy)</p>
+
+<p><img src="./IoT - Using Cloud IoT Core to connect a microcontroller (ESP32) to the Google Cloud Platform_files/07_gcp-marketplace.png" alt="pic07_gcp-marketplace"></p>
+
+<p>I personally don’t really like this approach, and prefer to create my own Kubernetes yaml files, which gives me more flexibility and also gives me the possibility to test it anytime on my local computer using tools such as <code class="language-plaintext highlighter-rouge">Minikube</code> or <code class="language-plaintext highlighter-rouge">Docker for Desktop</code>.</p>
+
+<p>Kubernetes scripts and howto are available here:<br>
+<a href="https://github.com/Nilhcem/esp32-cloud-iot-core-k8s/tree/master/05-influxdb_grafana_k8s">https://github.com/Nilhcem/esp32-cloud-iot-core-k8s/tree/master/05-influxdb_grafana_k8s</a></p>
+
+<p>We can clone the project, then create the Kubernetes objects:</p>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl create <span class="nt">-f</span> k8s/
+</code></pre></div></div>
+<p>And now, we have our cluster running and available from anywhere:</p>
+
+<p><img src="./IoT - Using Cloud IoT Core to connect a microcontroller (ESP32) to the Google Cloud Platform_files/08_gke-cluster.png" alt="pic08_gke-cluster">
+<br>
+<img src="./IoT - Using Cloud IoT Core to connect a microcontroller (ESP32) to the Google Cloud Platform_files/09_gke-services.png" alt="pic09_gke-services">
+<br></p>
+
+<h2 id="persist-received-data-with-a-cloud-function">Persist received data with a Cloud Function</h2>
+
+<p>The last step is to persist data from Pub/Sub to InfluxDB.<br>
+For that, we can write a Cloud Function that will be triggered each time a message is available on Pub/Sub.</p>
+
+<p>We can write Cloud Functions in Javascript, Python, and Go. I opted for a Python Cloud Function:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">base64</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="kn">from</span> <span class="nn">influxdb</span> <span class="kn">import</span> <span class="n">InfluxDBClient</span>
+
+
+<span class="k">def</span> <span class="nf">iotcore_pubsub_to_influxdb</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+    <span class="n">influxdb_client</span> <span class="o">=</span> <span class="n">InfluxDBClient</span><span class="p">(</span><span class="s">'&lt;host&gt;'</span><span class="p">,</span> <span class="mi">8086</span><span class="p">,</span> <span class="s">'&lt;username&gt;'</span><span class="p">,</span> <span class="s">'&lt;password&gt;'</span><span class="p">,</span> <span class="s">'iot'</span><span class="p">)</span>
+    <span class="n">device_id</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">'attributes'</span><span class="p">][</span><span class="s">'deviceId'</span><span class="p">]</span>
+    <span class="n">json_data</span> <span class="o">=</span> <span class="n">base64</span><span class="p">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">'data'</span><span class="p">]).</span><span class="n">decode</span><span class="p">(</span><span class="s">'utf-8'</span><span class="p">)</span>
+    <span class="n">iot_data</span> <span class="o">=</span> <span class="n">json</span><span class="p">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json_data</span><span class="p">)</span>
+    <span class="n">time_str</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="n">iot_data</span><span class="p">[</span><span class="s">'timestamp'</span><span class="p">]).</span><span class="n">strftime</span><span class="p">(</span><span class="s">'%Y-%m-%dT%H:%M:%SZ'</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">measurement</span> <span class="ow">in</span> <span class="p">[</span><span class="s">'temperature'</span><span class="p">,</span> <span class="s">'humidity'</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">measurement</span> <span class="ow">in</span> <span class="n">iot_data</span><span class="p">:</span>
+            <span class="n">_send_sensor_data_to_influxdb</span><span class="p">(</span><span class="n">influxdb_client</span><span class="p">,</span> <span class="n">device_id</span><span class="p">,</span> <span class="n">time_str</span><span class="p">,</span> <span class="n">measurement</span><span class="p">,</span> <span class="n">iot_data</span><span class="p">[</span><span class="n">measurement</span><span class="p">])</span>
+
+
+<span class="k">def</span> <span class="nf">_send_sensor_data_to_influxdb</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">device_id</span><span class="p">,</span> <span class="n">time_str</span><span class="p">,</span> <span class="n">measurement</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">json_body</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s">'measurement'</span><span class="p">:</span> <span class="n">measurement</span><span class="p">,</span>
+            <span class="s">'tags'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s">'device'</span><span class="p">:</span> <span class="n">device_id</span>
+            <span class="p">},</span>
+            <span class="s">'time'</span><span class="p">:</span> <span class="n">time_str</span><span class="p">,</span>
+            <span class="s">'fields'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s">'value'</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+    <span class="n">client</span><span class="p">.</span><span class="n">write_points</span><span class="p">(</span><span class="n">json_body</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Deploying the Cloud function can be done in as simple command:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gcloud functions deploy iotcore_pubsub_to_influxdb <span class="se">\</span>
+  <span class="nt">--runtime</span> python37 <span class="se">\</span>
+  <span class="nt">--trigger-topic</span> <span class="nv">$PUBSUB_TOPIC</span> <span class="se">\</span>
+  <span class="nt">--region</span> <span class="nv">$REGION</span>
+</code></pre></div></div>
+
+<p>Complete implementation available here:<br>
+<a href="https://github.com/Nilhcem/esp32-cloud-iot-core-k8s/tree/master/06-cloud_function">https://github.com/Nilhcem/esp32-cloud-iot-core-k8s/tree/master/06-cloud_function</a></p>
+
+<p>And we have everything running!</p>
+
+<p><img src="./IoT - Using Cloud IoT Core to connect a microcontroller (ESP32) to the Google Cloud Platform_files/10_grafana.png" alt="pic10_grafana"></p>
+
+<p>In this article, we discovered how Cloud IoT Core helps us to easily and securely connect large fleets of devices directly to the Google Cloud, using industry standard protocols such as HTTP or MQTT.</p>
+
+<p>Our ESP32 is now connected to the Google Cloud and is sending data there continuously.<br>
+You can find the complete source code here: <a href="https://github.com/Nilhcem/esp32-cloud-iot-core-k8s">https://github.com/Nilhcem/esp32-cloud-iot-core-k8s</a></p>
+
+<p>Next time, will see other ways to collect, process, analyze and visualize IoT data, skipping kubernetes, using only hosted Google services.</p>
+
+
+  </div>
+
+  
+    
+
+  <div id="disqus_recommendations" style="margin-bottom: 12px;"><iframe id="dsq-app4065" name="dsq-app4065" allowtransparency="true" frameborder="0" scrolling="no" tabindex="0" title="Disqus" width="100%" src="./IoT - Using Cloud IoT Core to connect a microcontroller (ESP32) to the Google Cloud Platform_files/saved_resource.html" style="width: 100% !important; border: none !important; overflow: hidden !important; height: 240px !important; display: inline !important; box-sizing: border-box !important;" horizontalscrolling="no" verticalscrolling="no"></iframe></div><div id="disqus_thread"><iframe id="dsq-app4381" name="dsq-app4381" allowtransparency="true" frameborder="0" scrolling="no" tabindex="0" title="Disqus" width="100%" src="./IoT - Using Cloud IoT Core to connect a microcontroller (ESP32) to the Google Cloud Platform_files/saved_resource(1).html" style="width: 1px !important; min-width: 100% !important; border: none !important; overflow: hidden !important; height: 1269px !important;" horizontalscrolling="no" verticalscrolling="no"></iframe></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'http://nilhcem.com/iot/cloud-iot-core-with-the-esp32-and-arduino';
+      this.page.identifier = 'http://nilhcem.com/iot/cloud-iot-core-with-the-esp32-and-arduino';
+    };
+
+    (function() {
+      var d = document, s = d.createElement('script');
+
+      s.src = 'https://nilhcem-dev.disqus.com/embed.js';
+
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+  
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div>A software development blog, by Gautier Mechling</div>
+
+      <ul class="social-media-list">
+        
+        <li>
+          <a href="https://twitter.com/Nilhcem"><span class="icon icon--twitter"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"></path></svg>
+</span>twitter.com/<span class="username">Nilhcem</span></a>
+
+        </li>
+        
+
+        
+        <li>
+          <a href="https://github.com/Nilhcem"><span class="icon icon--github"><svg viewBox="0 0 16 16" width="16px" height="16px"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"></path></svg>
+</span>github.com/<span class="username">Nilhcem</span></a>
+
+        </li>
+        
+      </ul>
+
+    </div>
+
+  </div>
+
+</footer>
+
+
+  
+
+
+<iframe style="display: none;" src="./IoT - Using Cloud IoT Core to connect a microcontroller (ESP32) to the Google Cloud Platform_files/saved_resource(2).html"></iframe><iframe style="display: none;" src="./IoT - Using Cloud IoT Core to connect a microcontroller (ESP32) to the Google Cloud Platform_files/saved_resource(3).html"></iframe></body></html>
