@@ -67,7 +67,6 @@ const DrawerContent = (
 ) => {
   const {navigation} = props;
   const {t} = useTranslation();
-  const {isDark, handleIsDark} = useData();
   const [active, setActive] = useState('Home');
   const {assets, colors, gradients, sizes} = useTheme();
   const labelColor = colors.text;
@@ -80,12 +79,9 @@ const DrawerContent = (
     [navigation, setActive],
   );
 
-  const handleWebLink = useCallback((url) => Linking.openURL(url), []);
-
   // screen list for Drawer menu
   const screens = [
     {name: t('screens.home'), to: 'Home', icon: assets.home},
-    {name: t('screens.profile'), to: 'Profile', icon: assets.profile},
     {name: t('screens.register'), to: 'Register', icon: assets.register},
   ];
 
@@ -165,6 +161,7 @@ export default () => {
         overlayColor="transparent"
         sceneContainerStyle={{backgroundColor: 'transparent'}}
         drawerContent={(props) => <DrawerContent {...props} />}
+        backBehavior={"none"}
         drawerStyle={{
           flex: 1,
           width: '60%',

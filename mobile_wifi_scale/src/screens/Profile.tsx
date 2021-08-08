@@ -1,10 +1,12 @@
 import React, {useCallback} from 'react';
-import {Platform, Linking} from 'react-native';
+import {Platform, Linking, TouchableOpacity, View} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';
 import {useNavigation} from '@react-navigation/core';
 
 import {Block, Button, Image, Text} from '../components/';
 import {useData, useTheme, useTranslation} from '../hooks/';
+import { logout } from '../actions/auth';
+import { useDispatch } from 'react-redux';
 
 const isAndroid = Platform.OS === 'android';
 
@@ -13,6 +15,7 @@ const Profile = () => {
   const {t} = useTranslation();
   const navigation = useNavigation();
   const {assets, colors, sizes} = useTheme();
+  const dispatch = useDispatch();
 
   const IMAGE_SIZE = (sizes.width - (sizes.padding + sizes.sm) * 2) / 3;
   const IMAGE_VERTICAL_SIZE =
@@ -89,7 +92,8 @@ const Profile = () => {
                   shadow={false}
                   radius={sizes.m}
                   onPress={() => {
-                    alert(`Follow ${user?.name}`);
+                    dispatch(logout());
+                    navigation.navigate('Home');
                   }}>
                   <Block
                     justify="center"
@@ -97,7 +101,7 @@ const Profile = () => {
                     paddingHorizontal={sizes.m}
                     color="rgba(255,255,255,0.2)">
                     <Text white bold transform="uppercase">
-                      {t('common.follow')}
+                      {'Sign Out'}
                     </Text>
                   </Block>
                 </Button>
@@ -166,12 +170,6 @@ const Profile = () => {
 
           {/* profile: about me */}
           <Block paddingHorizontal={sizes.sm}>
-            <Text h5 semibold marginBottom={sizes.s} marginTop={sizes.sm}>
-              {t('profile.aboutMe')}
-            </Text>
-            <Text p lineHeight={26}>
-              {user?.about}
-            </Text>
           </Block>
 
           {/* profile: photo album */}

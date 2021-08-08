@@ -1,14 +1,31 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Platform, StatusBar} from 'react-native';
 import {useFonts} from 'expo-font';
 import AppLoading from 'expo-app-loading';
 import {NavigationContainer, DefaultTheme} from '@react-navigation/native';
+import {useSelector, useDispatch} from "react-redux";
 
-import Menu from './Menu';
+import LoggedInMenu from './LoggedInMenu';
+import LoggedOutMenu from './LoggedOutMenu';
 import {useData, ThemeProvider, TranslationProvider} from '../hooks';
+import {fire} from '../api/firebase';
+import {loggedIn, loggedOut} from '../actions/auth';
 
 export default () => {
   const {isDark, theme, setTheme} = useData();
+  const isLoggedIn = useSelector((state) => state.auth.user);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const unsubscribe = fire.auth().onAuthStateChanged((user) => { // detaching the listener
+      if (user) {
+        dispatch(loggedIn({user}));
+      } else {
+        dispatch(loggedOut());
+      }
+    });
+    return () => unsubscribe(); // unsubscribing from the listener when the component is unmounting. 
+}, []);
 
   /* set the status bar based on isDark constant */
   useEffect(() => {
@@ -45,13 +62,18 @@ export default () => {
       background: String(theme.colors.background),
     },
   };
-
+  
   return (
     <TranslationProvider>
       <ThemeProvider theme={theme} setTheme={setTheme}>
-        <NavigationContainer theme={navigationTheme}>
-          <Menu />
-        </NavigationContainer>
+        {isLoggedIn ?
+          <NavigationContainer theme={navigationTheme}>
+              <LoggedInMenu />
+          </NavigationContainer> :
+          <NavigationContainer theme={navigationTheme}>
+              <LoggedOutMenu />
+          </NavigationContainer>
+        }
       </ThemeProvider>
     </TranslationProvider>
   );

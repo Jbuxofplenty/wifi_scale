@@ -5,6 +5,9 @@ import {useNavigation} from '@react-navigation/core';
 import {useData, useTheme, useTranslation} from '../hooks/';
 import * as regex from '../constants/regex';
 import {Block, Button, Input, Image, Text, Checkbox} from '../components/';
+import { registerUser, signIn } from '../api/firebase';
+import { login } from "../actions/auth";
+import {useDispatch, useSelector} from "react-redux";
 
 const isAndroid = Platform.OS === 'android';
 
@@ -34,10 +37,13 @@ const Register = () => {
   const [registration, setRegistration] = useState<IRegistration>({
     name: '',
     email: '',
-    password: '',
+    password: 'Password123',
     agreed: false,
   });
   const {assets, colors, gradients, sizes} = useTheme();
+  const auth = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  // auth.loggingIn to determin if loading should be called
 
   const handleChange = useCallback(
     (value) => {
@@ -49,7 +55,7 @@ const Register = () => {
   const handleSignUp = useCallback(() => {
     if (!Object.values(isValid).includes(false)) {
       /** send/save registratin data */
-      console.log('handleSignUp', registration);
+      registerUser(registration.email, registration.password, registration.password);
     }
   }, [isValid, registration]);
 
@@ -240,7 +246,10 @@ const Register = () => {
                 shadow={!isAndroid}
                 marginVertical={sizes.s}
                 marginHorizontal={sizes.sm}
-                onPress={() => console.log('h')}>
+                onPress={() => {
+                  dispatch(login('jbuxofplenty@gmail.com', 'Password123'));
+                  navigation.navigate('Home');
+                }}>
                 <Text bold primary transform="uppercase">
                   {t('common.signin')}
                 </Text>
