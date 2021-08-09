@@ -9,6 +9,7 @@ lerna-debug.log*
 # Sensitive data
 offline
 private-key.der
+mobile_wifi_scale/src/config/keys.tsx
 
 # Backups
 mobile_wifi_scale.bak
