@@ -6,13 +6,18 @@ import {
 } from 'redux';
 import ReduxThunk from 'redux-thunk';
 import authReducer from './auth';
+import dataReducer from './data';
 import logger from 'redux-logger';
 
 const reducers = combineReducers({
   auth: authReducer,
+  data: dataReducer,
 });
 
-const middleware = [ReduxThunk, logger];
+const middleware = [ReduxThunk];
+
+// For debugging purposes
+// const middleware = [ReduxThunk, logger];
 
 const store = createStore(
   reducers,

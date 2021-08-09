@@ -8,10 +8,12 @@ import {
   DrawerContentOptions,
   DrawerContentScrollView,
 } from '@react-navigation/drawer';
+import { useSelector, useDispatch } from 'react-redux';
 
 import Screens from './Screens';
 import {Block, Text, Switch, Button, Image} from '../components';
 import {useData, useTheme, useTranslation} from '../hooks';
+import { updatePrevScreen, updateActiveScreen } from '../actions/data';
 
 const Drawer = createDrawerNavigator();
 
@@ -65,23 +67,35 @@ const ScreensStack = () => {
 const DrawerContent = (
   props: DrawerContentComponentProps<DrawerContentOptions>,
 ) => {
-  const {navigation} = props;
+  const {navigation, isLoggedIn} = props;
   const {t} = useTranslation();
-  const [active, setActive] = useState('Home');
+  const active = useSelector((state) => state.data.activeScreen);
+  const prevScreen = useSelector((state) => state.data.prevScreen);
+  const dispatch = useDispatch();
   const {assets, colors, gradients, sizes} = useTheme();
   const labelColor = colors.text;
 
   const handleNavigation = useCallback(
     (to) => {
-      setActive(to);
+      dispatch(updatePrevScreen(active));
+      dispatch(updateActiveScreen(to));
       navigation.navigate(to);
     },
-    [navigation, setActive],
+    [navigation, active, prevScreen],
   );
 
+  const handleWebLink = useCallback((url) => Linking.openURL(url), []);
+
   // screen list for Drawer menu
-  const screens = [
+  const screens = isLoggedIn ?
+  [
     {name: t('screens.home'), to: 'Home', icon: assets.home},
+    {name: t('screens.products'), to: 'Products', icon: assets.articles},
+    {name: t('screens.profile'), to: 'Profile', icon: assets.profile},
+  ] :
+  [
+    {name: t('screens.home'), to: 'Home', icon: assets.home},
+    {name: t('screens.products'), to: 'Products', icon: assets.articles},
     {name: t('screens.register'), to: 'Register', icon: assets.register},
   ];
 
@@ -151,8 +165,9 @@ const DrawerContent = (
 };
 
 /* drawer menu navigation */
-export default () => {
+export default (props) => {
   const {gradients} = useTheme();
+  const {isLoggedIn} = props;
 
   return (
     <Block gradient={gradients.light}>
@@ -160,8 +175,8 @@ export default () => {
         drawerType="slide"
         overlayColor="transparent"
         sceneContainerStyle={{backgroundColor: 'transparent'}}
-        drawerContent={(props) => <DrawerContent {...props} />}
-        backBehavior={"none"}
+        drawerContent={(props) => <DrawerContent {...props} isLoggedIn={isLoggedIn} />}
+        backBehavior={"history"}
         drawerStyle={{
           flex: 1,
           width: '60%',

@@ -6,9 +6,11 @@ import "firebase/database";
 //import "firebase/firestore";
 //import "firebase/functions";
 //import "firebase/storage";
+import * as GoogleAuthentication from 'expo-google-app-auth';
 
 import {Alert} from "react-native";
 import Debug from '../constants/debug';
+import apiKeys from '../config/keys';
 
 let debug = "";
 if(Debug.DEBUG) {
@@ -25,15 +27,40 @@ const emptyAddress = {
 
 export const fire = firebase;
 
-export async function registerUser(email, password, username) {
-  try {
-    await firebase.auth().createUserWithEmailAndPassword(email, password);
-    const currentUser = firebase.auth().currentUser;
+export async function googleSignIn() {
+  GoogleAuthentication.logInAsync({
+    // Figure out how to add correct client ids for ios and android
+    androidStandaloneAppClientId: apiKeys.googleSignInWebClientId,
+    iosStandaloneAppClientId: apiKeys.googleSignInWebClientId,
+    clientId: apiKeys.googleSignInWebClientId,
+    scopes: ['profile', 'email']
+  })
+  .then((logInResult) => {
+    if (logInResult.type === 'success') {
+      const { idToken, accessToken } = logInResult;
+      const credential = firebase.auth.GoogleAuthProvider.credential(
+        idToken,
+        accessToken
+      );
 
-    const db = firebase.database();
+      return firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(async () => {
+        return firebase.auth().signInWithCredential(credential);
+      });
+    }
+    Alert.alert("There is something wrong!", logInResult);
+    return Promise.reject();
+  })
+  .catch((error) => {
+    Alert.alert("There is something wrong!", error.message);
+    return Promise.reject();
+  });
+}
+
+export async function registerUser(username, email, password) {
+  try {
     // Add user to database
-    firebase.auth().createUserWithEmailAndPassword(email, password).then((authData) => {
-      firebase.database().ref(debug + "/users/" + authData.user.uid).set({
+    return firebase.auth().createUserWithEmailAndPassword(email, password).then((authData) => {
+      return firebase.database().ref(debug + "/users/" + authData.user.uid).set({
         email: email,
         username: username,
         phone: "",
@@ -41,31 +68,33 @@ export async function registerUser(email, password, username) {
         formattedAddress: "",
         headshot: "https://s3.amazonaws.com/dejafood.com/mobile_assets/deja_gradient.png",
       });
-      signIn(email, password);
      }).catch(function(error) {
-      Alert.alert("There is something wrong!", error.message);
+        console.log(email)
+        Alert.alert("There is something wrong!", error.message);
+        return false;
     });
-  } catch (err) {
-    Alert.alert("There is something wrong!", err.message);
+  } catch (error) {
+    Alert.alert("There is something wrong!", error.message);
+    return false
   }
 }
 
 export async function signIn(email, password) {
   try {
-    await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(async () => {
-      return firebase.auth().signInWithEmailAndPassword(email, password);
+    return firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(async () => {
+      return firebase.auth().signInWithEmailAndPassword(email.trim(), password.trim());
     })
     return firebase.auth().currentUser;
-  } catch (err) {
-    Alert.alert("There is something wrong!", err.message);
+  } catch (error) {
+    return Alert.alert("There is something wrong!", error.message);
   }
 }
 
 export async function loggingOut() {
   try {
     await firebase.auth().signOut();
-  } catch (err) {
-    Alert.alert('There is something wrong!', err.message);
+  } catch (error) {
+    Alert.alert('There is something wrong!', error.message);
   }
 }
 

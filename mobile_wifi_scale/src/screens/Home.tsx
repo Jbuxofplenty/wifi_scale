@@ -1,36 +1,50 @@
-import React, {useCallback, useState} from 'react';
+import React, {useEffect, useState} from 'react';
+import {FlatList} from 'react-native';
 
-import {useData, useTheme, useTranslation} from '../hooks/';
-import {Block, Button, Image, Input, Product, Text} from '../components/';
+import {useData, useTheme} from '../hooks';
+import {IArticle, ICategory} from '../constants/types';
+import {Block, Button, Article, Text} from '../components';
 
-const Home = () => {
-  const {t} = useTranslation();
-  const [tab, setTab] = useState<number>(0);
-  const {following, trending} = useData();
-  const [products, setProducts] = useState(following);
-  const {assets, colors, fonts, gradients, sizes} = useTheme();
+const Articles = () => {
+  const data = useData();
+  const [selected, setSelected] = useState<ICategory>();
+  const [articles, setArticles] = useState<IArticle[]>([]);
+  const [categories, setCategories] = useState<ICategory[]>([]);
+  const {colors, gradients, sizes} = useTheme();
+
+  // init articles
+  useEffect(() => {
+    setArticles(data?.articles);
+    setCategories(data?.categories);
+    setSelected(data?.categories[0]);
+  }, [data.articles, data.categories]);
+
+  // update articles on category change
+  useEffect(() => {
+    const category = data?.categories?.find(
+      (category) => category?.id === selected?.id,
+    );
+
+    const newArticles = data?.articles?.filter(
+      (article) => article?.category?.id === category?.id,
+    );
+
+    setArticles(newArticles);
+  }, [data, selected, setArticles]);
 
   return (
     <Block>
-      {/* search input */}
-      <Block color={colors.card} flex={0} padding={sizes.padding}>
-        <Input search placeholder={t('common.search')} />
-      </Block>
 
-      {/* products list */}
-      <Block
-        scroll
-        paddingHorizontal={sizes.padding}
+      <FlatList
+        data={articles}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{paddingBottom: sizes.l}}>
-        <Block row wrap="wrap" justify="space-between" marginTop={sizes.sm}>
-          {products?.map((product) => (
-            <Product {...product} key={`card-${product?.id}`} />
-          ))}
-        </Block>
-      </Block>
+        keyExtractor={(item) => `${item?.id}`}
+        style={{paddingHorizontal: sizes.padding}}
+        contentContainerStyle={{paddingBottom: sizes.l}}
+        renderItem={({item}) => <Article {...item} />}
+      />
     </Block>
   );
 };
 
-export default Home;
+export default Articles;

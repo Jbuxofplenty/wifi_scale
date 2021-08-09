@@ -6,25 +6,7 @@ import {
   AUTH_LOGGING_OUT,
   AUTH_LOGOUT
 } from "../constants/auth";
-import { signOut, signIn } from '../api/firebase';
-
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-export async function getAuthAsyncStorage() {
-  const user = await AsyncStorage.getItem('userData');
-  return {
-    user: JSON.parse(user),
-  };
-}
-
-export async function setAuthAsyncStorage(response) {
-  await AsyncStorage.setItem('userData', JSON.stringify(response));
-}
-
-export async function resetAuthAsyncStorage() {
-  await AsyncStorage.removeItem('userData');
-}
-
+import { signOut, signIn, registerUser, googleSignIn } from '../api/firebase';
 
 export const loggingIn = (loggingIn) => ({
   type: AUTH_LOGGING_IN,
@@ -41,13 +23,35 @@ export const errorLogIn = (errorMessage) => ({
   payload: errorMessage,
 });
 
-export const login = (username, password) => (dispatch) => {
+export const googleLogin = () => (dispatch) => {
   dispatch(loggingIn(true));
-  signIn(username, password).then(async (res) => {
-    await setAuthAsyncStorage(res);
+  googleSignIn().then(async (res) => {
+    console.log(res)
     await dispatch(loggedIn({user: res}));
   }).catch((err) => {
-    dispatch(errorLogIn('Wrong username or password'));
+    dispatch(errorLogIn(err));
+  }).finally(() => {
+    dispatch(loggingIn(false));
+  });
+}
+
+export const login = (email, password) => (dispatch) => {
+  dispatch(loggingIn(true));
+  signIn(email, password).then(async (res) => {
+    await dispatch(loggedIn({user: res}));
+  }).catch((err) => {
+    dispatch(errorLogIn(err));
+  }).finally(() => {
+    dispatch(loggingIn(false));
+  });
+};
+
+export const signUp = (username, email, password) => (dispatch) => {
+  dispatch(loggingIn(true));
+  registerUser(username, email, password).then(async (res) => {
+    await dispatch(login(email, password));
+  }).catch((err) => {
+    dispatch(errorLogIn(err));
   }).finally(() => {
     dispatch(loggingIn(false));
   });
@@ -76,5 +80,4 @@ export const logout = () => async (dispatch) => {
   }).finally(() => {
     dispatch(loggingOut(false));
   });
-  await resetAuthAsyncStorage();
 };

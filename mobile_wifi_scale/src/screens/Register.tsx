@@ -5,9 +5,9 @@ import {useNavigation} from '@react-navigation/core';
 import {useData, useTheme, useTranslation} from '../hooks/';
 import * as regex from '../constants/regex';
 import {Block, Button, Input, Image, Text, Checkbox} from '../components/';
-import { registerUser, signIn } from '../api/firebase';
-import { login } from "../actions/auth";
-import {useDispatch, useSelector} from "react-redux";
+import { login, signUp, googleLogin } from "../actions/auth";
+import { updateActiveScreen } from "../actions/data";
+import { useDispatch, useSelector } from "react-redux";
 
 const isAndroid = Platform.OS === 'android';
 
@@ -24,8 +24,9 @@ interface IRegistrationValidation {
   agreed: boolean;
 }
 
-const Register = () => {
-  const {isDark} = useData();
+const Register = ({ route }) => {
+  /* 2. Get the param */
+  const [register, setRegister] = useState(route.params.register);
   const {t} = useTranslation();
   const navigation = useNavigation();
   const [isValid, setIsValid] = useState<IRegistrationValidation>({
@@ -34,16 +35,18 @@ const Register = () => {
     password: false,
     agreed: false,
   });
+
   const [registration, setRegistration] = useState<IRegistration>({
     name: '',
     email: '',
-    password: 'Password123',
+    password: '',
     agreed: false,
   });
+
   const {assets, colors, gradients, sizes} = useTheme();
-  const auth = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
-  // auth.loggingIn to determin if loading should be called
+  const prevScreen = useSelector((state) => state.data.prevScreen);
 
   const handleChange = useCallback(
     (value) => {
@@ -52,10 +55,22 @@ const Register = () => {
     [setRegistration],
   );
 
+  useEffect(() => {
+    if(user) {
+      navigation.navigate('Home');
+      dispatch(updateActiveScreen('Home'));
+    }
+  }, [user]);
+
   const handleSignUp = useCallback(() => {
-    if (!Object.values(isValid).includes(false)) {
-      /** send/save registratin data */
-      registerUser(registration.email, registration.password, registration.password);
+    if (buttonsEnabled()) {
+      dispatch(signUp(registration.name, registration.email, registration.password));
+    }
+  }, [isValid, registration]);
+
+  const handleLogin = useCallback(() => {
+    if (buttonsEnabled()) {
+      dispatch(login(registration.email, registration.password));
     }
   }, [isValid, registration]);
 
@@ -68,6 +83,68 @@ const Register = () => {
       agreed: registration.agreed,
     }));
   }, [registration, setIsValid]);
+
+  const buttonsEnabled = () => {
+    if(register) return !Object.values(isValid).includes(false);
+    if(isValid.email && isValid.password) return true;
+    return false;
+  }
+
+  const renderLoginButtons = () => {
+    return (
+      <>
+        <Button
+          onPress={handleLogin}
+          marginVertical={sizes.s}
+          marginHorizontal={sizes.sm}
+          gradient={gradients.primary}
+          disabled={!buttonsEnabled()}>
+          <Text bold white transform="uppercase">
+            {t('common.signin')}
+          </Text>
+        </Button>
+        <Button
+          primary
+          outlined
+          shadow={!isAndroid}
+          marginVertical={sizes.s}
+          marginHorizontal={sizes.sm}
+          onPress={() => setRegister(!register)}>
+          <Text bold primary transform="uppercase">
+            {t('common.signup')}
+          </Text>
+        </Button>
+      </>
+    )
+  }
+
+  const renderRegisterButtons = () => {
+    return (
+      <>
+        <Button
+          onPress={handleSignUp}
+          marginVertical={sizes.s}
+          marginHorizontal={sizes.sm}
+          gradient={gradients.primary}
+          disabled={!buttonsEnabled()}>
+          <Text bold white transform="uppercase">
+            {t('common.signup')}
+          </Text>
+        </Button>
+        <Button
+          primary
+          outlined
+          shadow={!isAndroid}
+          marginVertical={sizes.s}
+          marginHorizontal={sizes.sm}
+          onPress={() => setRegister(!register)}>
+          <Text bold primary transform="uppercase">
+            {t('common.signin')}
+          </Text>
+        </Button>
+      </>
+    )
+  }
 
   return (
     <Block safe marginTop={sizes.md}>
@@ -84,7 +161,10 @@ const Register = () => {
               row
               flex={0}
               justify="flex-start"
-              onPress={() => navigation.goBack()}>
+              onPress={() => {
+                navigation.goBack();
+                dispatch(updateActiveScreen(prevScreen));
+              }}>
               <Image
                 radius={0}
                 width={10}
@@ -103,6 +183,7 @@ const Register = () => {
             </Text>
           </Image>
         </Block>
+        
         {/* register form */}
         <Block
           keyboard
@@ -133,7 +214,6 @@ const Register = () => {
                     source={assets.facebook}
                     height={sizes.m}
                     width={sizes.m}
-                    color={isDark ? colors.icon : undefined}
                   />
                 </Button>
                 <Button outlined gray shadow={!isAndroid}>
@@ -141,15 +221,13 @@ const Register = () => {
                     source={assets.apple}
                     height={sizes.m}
                     width={sizes.m}
-                    color={isDark ? colors.icon : undefined}
                   />
                 </Button>
-                <Button outlined gray shadow={!isAndroid}>
+                <Button outlined gray shadow={!isAndroid} onPress={() => dispatch(googleLogin())}>
                   <Image
                     source={assets.google}
                     height={sizes.m}
                     width={sizes.m}
-                    color={isDark ? colors.icon : undefined}
                   />
                 </Button>
               </Block>
@@ -182,15 +260,17 @@ const Register = () => {
               </Block>
               {/* form inputs */}
               <Block paddingHorizontal={sizes.sm}>
-                <Input
-                  autoCapitalize="none"
-                  marginBottom={sizes.m}
-                  label={t('common.name')}
-                  placeholder={t('common.namePlaceholder')}
-                  success={Boolean(registration.name && isValid.name)}
-                  danger={Boolean(registration.name && !isValid.name)}
-                  onChangeText={(value) => handleChange({name: value})}
-                />
+                {register &&
+                  <Input
+                    autoCapitalize="none"
+                    marginBottom={sizes.m}
+                    label={t('common.name')}
+                    placeholder={t('common.namePlaceholder')}
+                    success={Boolean(registration.name && isValid.name)}
+                    danger={Boolean(registration.name && !isValid.name)}
+                    onChangeText={(value) => handleChange({name: value})}
+                  />
+                }
                 <Input
                   autoCapitalize="none"
                   marginBottom={sizes.m}
@@ -213,47 +293,26 @@ const Register = () => {
                 />
               </Block>
               {/* checkbox terms */}
-              <Block row flex={0} align="center" paddingHorizontal={sizes.sm}>
-                <Checkbox
-                  marginRight={sizes.sm}
-                  checked={registration?.agreed}
-                  onPress={(value) => handleChange({agreed: value})}
-                />
-                <Text paddingRight={sizes.s}>
-                  {t('common.agree')}
-                  <Text
-                    semibold
-                    onPress={() => {
-                      Linking.openURL('https://www.creative-tim.com/terms');
-                    }}>
-                    {t('common.terms')}
+              {register &&
+                <Block row flex={0} align="center" paddingHorizontal={sizes.sm}>
+                  <Checkbox
+                    marginRight={sizes.sm}
+                    checked={registration?.agreed}
+                    onPress={(value) => handleChange({agreed: value})}
+                  />
+                  <Text paddingRight={sizes.s}>
+                    {t('common.agree')}
+                    <Text
+                      semibold
+                      onPress={() => {
+                        Linking.openURL('https://www.creative-tim.com/terms');
+                      }}>
+                      {t('common.terms')}
+                    </Text>
                   </Text>
-                </Text>
-              </Block>
-              <Button
-                onPress={handleSignUp}
-                marginVertical={sizes.s}
-                marginHorizontal={sizes.sm}
-                gradient={gradients.primary}
-                disabled={Object.values(isValid).includes(false)}>
-                <Text bold white transform="uppercase">
-                  {t('common.signup')}
-                </Text>
-              </Button>
-              <Button
-                primary
-                outlined
-                shadow={!isAndroid}
-                marginVertical={sizes.s}
-                marginHorizontal={sizes.sm}
-                onPress={() => {
-                  dispatch(login('jbuxofplenty@gmail.com', 'Password123'));
-                  navigation.navigate('Home');
-                }}>
-                <Text bold primary transform="uppercase">
-                  {t('common.signin')}
-                </Text>
-              </Button>
+                </Block>
+              }
+              {register ? renderRegisterButtons() : renderLoginButtons()}
             </Block>
           </Block>
         </Block>

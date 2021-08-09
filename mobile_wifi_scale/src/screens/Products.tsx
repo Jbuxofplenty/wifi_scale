@@ -1,20 +1,20 @@
-import React, {useEffect, useState} from 'react';
-import {FlatList} from 'react-native';
+import React, {useCallback, useState, useEffect} from 'react';
 
-import {useData, useTheme} from '../hooks/';
+import {useData, useTheme, useTranslation} from '../hooks';
 import {IArticle, ICategory} from '../constants/types';
-import {Block, Button, Article, Text} from '../components/';
+import {Block, Button, Image, Input, Product, Text} from '../components';
 
-const Articles = () => {
+const Products = () => {
+  const {t} = useTranslation();
   const data = useData();
+  const {following} = data;
+  const [products, setProducts] = useState(following);
+  const {assets, colors, fonts, gradients, sizes} = useTheme();
   const [selected, setSelected] = useState<ICategory>();
-  const [articles, setArticles] = useState<IArticle[]>([]);
   const [categories, setCategories] = useState<ICategory[]>([]);
-  const {colors, gradients, sizes} = useTheme();
 
   // init articles
   useEffect(() => {
-    setArticles(data?.articles);
     setCategories(data?.categories);
     setSelected(data?.categories[0]);
   }, [data.articles, data.categories]);
@@ -25,15 +25,20 @@ const Articles = () => {
       (category) => category?.id === selected?.id,
     );
 
-    const newArticles = data?.articles?.filter(
+    const newFollowing = data?.following?.filter(
       (article) => article?.category?.id === category?.id,
     );
 
-    setArticles(newArticles);
-  }, [data, selected, setArticles]);
+    setProducts(newFollowing);
+  }, [data, selected, setProducts]);
 
   return (
     <Block>
+      {/* search input */}
+      <Block color={colors.card} flex={0} padding={sizes.padding}>
+        <Input search placeholder={t('common.search')} />
+      </Block>
+
       {/* categories list */}
       <Block color={colors.card} row flex={0} paddingVertical={sizes.padding}>
         <Block
@@ -66,16 +71,20 @@ const Articles = () => {
         </Block>
       </Block>
 
-      <FlatList
-        data={articles}
+      {/* products list */}
+      <Block
+        scroll
+        paddingHorizontal={sizes.padding}
         showsVerticalScrollIndicator={false}
-        keyExtractor={(item) => `${item?.id}`}
-        style={{paddingHorizontal: sizes.padding}}
-        contentContainerStyle={{paddingBottom: sizes.l}}
-        renderItem={({item}) => <Article {...item} />}
-      />
+        contentContainerStyle={{paddingBottom: sizes.l}}>
+        <Block row wrap="wrap" justify="space-between" marginTop={sizes.sm}>
+          {products?.map((product) => (
+            <Product {...product} key={`card-${product?.id}`} />
+          ))}
+        </Block>
+      </Block>
     </Block>
   );
 };
 
-export default Articles;
+export default Products;

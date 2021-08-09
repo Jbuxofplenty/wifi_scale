@@ -81,11 +81,18 @@ export const USERS: IUser[] = [
   },
 ];
 
+// categories
+export const CATEGORIES: ICategory[] = [
+  {id: 1, name: 'Popular'},
+  {id: 2, name: 'Newest'},
+];
+
 // following cards
 export const FOLLOWING: IProduct[] = [
   {
     id: 3,
     type: 'horizontal',
+    category: CATEGORIES[0],
     title: 'Experiences and things to do wherever you are.',
     image:
       'https://images.unsplash.com/photo-1512470876302-972faa2aa9a4?fit=crop&w=450&q=80',
@@ -97,18 +104,11 @@ export const TRENDING: IProduct[] = [
   {
     id: 3,
     type: 'horizontal',
+    category: CATEGORIES[0],
     title: 'Experiences and things to do wherever you are.',
     image:
       'https://images.unsplash.com/photo-1512470876302-972faa2aa9a4?fit=crop&w=450&q=80',
   }
-];
-
-// categories
-export const CATEGORIES: ICategory[] = [
-  {id: 1, name: 'Popular'},
-  {id: 2, name: 'Newest'},
-  {id: 3, name: 'Fashion'},
-  {id: 4, name: 'Best deal'},
 ];
 
 // article options

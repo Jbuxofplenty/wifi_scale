@@ -22,7 +22,7 @@ import {light} from '../constants';
 export const DataContext = React.createContext({});
 
 export const DataProvider = ({children}: {children: React.ReactNode}) => {
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(true);
   const [theme, setTheme] = useState<ITheme>(light);
   const [user, setUser] = useState<IUser>(USERS[0]);
   const [users, setUsers] = useState<IUser[]>(USERS);

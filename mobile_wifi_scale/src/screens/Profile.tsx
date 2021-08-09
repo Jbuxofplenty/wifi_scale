@@ -6,6 +6,7 @@ import {useNavigation} from '@react-navigation/core';
 import {Block, Button, Image, Text} from '../components/';
 import {useData, useTheme, useTranslation} from '../hooks/';
 import { logout } from '../actions/auth';
+import { updateActiveScreen } from '../actions/data';
 import { useDispatch } from 'react-redux';
 
 const isAndroid = Platform.OS === 'android';
@@ -94,6 +95,7 @@ const Profile = () => {
                   onPress={() => {
                     dispatch(logout());
                     navigation.navigate('Home');
+                    dispatch(updateActiveScreen('Home'));
                   }}>
                   <Block
                     justify="center"

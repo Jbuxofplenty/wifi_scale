@@ -1,6 +1,5 @@
 import 'react-native-gesture-handler';
 import React from 'react';
-import * as SecureStore from 'expo-secure-store';
 import {Provider} from 'react-redux';
 
 import {DataProvider} from './src/hooks';

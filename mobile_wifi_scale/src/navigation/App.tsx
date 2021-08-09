@@ -5,15 +5,14 @@ import AppLoading from 'expo-app-loading';
 import {NavigationContainer, DefaultTheme} from '@react-navigation/native';
 import {useSelector, useDispatch} from "react-redux";
 
-import LoggedInMenu from './LoggedInMenu';
-import LoggedOutMenu from './LoggedOutMenu';
+import Menu from './Menu';
 import {useData, ThemeProvider, TranslationProvider} from '../hooks';
 import {fire} from '../api/firebase';
 import {loggedIn, loggedOut} from '../actions/auth';
 
 export default () => {
   const {isDark, theme, setTheme} = useData();
-  const isLoggedIn = useSelector((state) => state.auth.user);
+  const isLoggedIn = useSelector((state) => state.auth.user ? true : false);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -66,14 +65,9 @@ export default () => {
   return (
     <TranslationProvider>
       <ThemeProvider theme={theme} setTheme={setTheme}>
-        {isLoggedIn ?
-          <NavigationContainer theme={navigationTheme}>
-              <LoggedInMenu />
-          </NavigationContainer> :
-          <NavigationContainer theme={navigationTheme}>
-              <LoggedOutMenu />
-          </NavigationContainer>
-        }
+        <NavigationContainer theme={navigationTheme}>
+          <Menu isLoggedIn={isLoggedIn} />
+        </NavigationContainer>
       </ThemeProvider>
     </TranslationProvider>
   );
