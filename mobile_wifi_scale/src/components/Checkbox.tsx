@@ -1,8 +1,6 @@
 import React, {useCallback, useState} from 'react';
 import {Platform, Pressable} from 'react-native';
 
-import * as Haptics from 'expo-haptics';
-
 import {useTheme} from '../hooks/';
 import Block from '../components/Block';
 import Image from '../components/Image';
@@ -23,7 +21,8 @@ const Checkbox = ({
 
     /* haptic feedback onPress */
     if (haptic) {
-      Haptics.selectionAsync();
+      // Link with react native
+      // Haptics.selectionAsync();
     }
   }, [checked, haptic, setChecked, onPress]);
 

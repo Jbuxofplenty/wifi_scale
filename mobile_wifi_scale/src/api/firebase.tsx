@@ -29,10 +29,12 @@ export const fire = firebase;
 
 export async function googleSignIn() {
   GoogleAuthentication.logInAsync({
-    // Figure out how to add correct client ids for ios and android
-    androidStandaloneAppClientId: apiKeys.googleSignInWebClientId,
-    iosStandaloneAppClientId: apiKeys.googleSignInWebClientId,
-    clientId: apiKeys.googleSignInWebClientId,
+    // Use client ID's of google cloud api keys for ios and android (auto-generated when a new app is added to firebase)
+    // host.exp.exponent must be specified as bundle ID in API key when using expo go
+    androidClientId: apiKeys.androidGoogleSignInWebClientId,
+    iosClientId: apiKeys.iosGoogleSignInWebClientId,
+    androidStandaloneAppClientId: apiKeys.androidGoogleSignInWebClientId,
+    iosStandaloneAppClientId: apiKeys.iosGoogleSignInWebClientId,
     scopes: ['profile', 'email']
   })
   .then((logInResult) => {

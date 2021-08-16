@@ -6,7 +6,6 @@ import {
   ViewStyle,
   StyleSheet,
 } from 'react-native';
-import * as Haptics from 'expo-haptics';
 
 import {ISwitchProps} from '../constants/types';
 import useTheme from '../hooks/useTheme';
@@ -38,7 +37,7 @@ const Switch = ({
 
     /* haptic feedback onPress */
     if (haptic) {
-      Haptics.selectionAsync();
+      // Haptics.selectionAsync();
     }
   }, [isChecked, haptic, setChecked, onPress]);
 

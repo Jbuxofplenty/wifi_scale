@@ -29,6 +29,15 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "wifi-scale.com.stripe.react.native",
+          "enableGooglePay": false
+        }
+      ]
+    ]
   }
 }

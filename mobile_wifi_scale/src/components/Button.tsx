@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import {LinearGradient} from 'expo-linear-gradient';
 import {Ionicons} from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 
 import useTheme from '../hooks/useTheme';
 import {IButtonProps} from '../constants/types';
@@ -180,7 +179,7 @@ const Button = ({
 
       /* haptic feedback onPress */
       if (haptic) {
-        Haptics.selectionAsync();
+        // Haptics.selectionAsync();
       }
     },
     [haptic, vibrate, vibrateRepeat, onPress],

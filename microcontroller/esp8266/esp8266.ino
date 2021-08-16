@@ -24,7 +24,7 @@ void setup() {
   // Wifi manager setup
   Serial.println("Starting WifiManager with SSID=WifiScale");
   WiFiManager wifiManager;
-  // wifiManager.resetSettings();
+  wifiManager.resetSettings();
   wifiManager.autoConnect("WifiScale");
   delay(1000);
   pinMode(LED_BUILTIN, OUTPUT);
