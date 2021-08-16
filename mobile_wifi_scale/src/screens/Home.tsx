@@ -4,9 +4,7 @@ import {FlatList} from 'react-native';
 import {useData, useTheme} from '../hooks';
 import {IArticle, ICategory} from '../constants/types';
 import {Block, Button, Article, Text} from '../components';
-import { NativeModules } from 'react-native';
-
-const IOSWifiManager = NativeModules.IOSWifiManager
+import WifiManager from "react-native-wifi-reborn";
 
 const Home = () => {
   const data = useData();
@@ -36,7 +34,23 @@ const Home = () => {
   }, [data, selected, setArticles]);
 
   const wifiConnect = async (ssid) => {
-    const isConnected = await IOSWifiManager.connectToSSID(ssid);
+    WifiManager.connectToSSID(ssid).then(
+      () => {
+        console.log("Connected successfully!");
+      },
+      () => {
+        console.log("Connection failed!");
+      }
+    );
+    
+    // WifiManager.getCurrentWifiSSID().then(
+    //   ssid => {
+    //     console.log("Your current connected wifi SSID is " + ssid);
+    //   },
+    //   () => {
+    //     console.log("Cannot get current SSID!");
+    //   }
+    // );
   }
 
   const onPress = () => {
