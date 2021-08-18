@@ -16,13 +16,13 @@ export default () => {
       <Stack.Screen
         name="Home"
         component={Home}
-        options={{headerShown: true}}
+        options={{title: 'Wifi Scale'}}
       />
       
       <Stack.Screen
         name="Products"
         component={Products}
-        options={{title: t('navigation.home')}}
+        options={{title: 'Products'}}
       />
 
       <Stack.Screen

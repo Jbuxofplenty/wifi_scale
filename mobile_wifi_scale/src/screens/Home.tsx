@@ -2,55 +2,38 @@ import React, {useEffect, useState} from 'react';
 import {FlatList} from 'react-native';
 
 import {useData, useTheme} from '../hooks';
-import {IArticle, ICategory} from '../constants/types';
-import {Block, Button, Article, Text} from '../components';
+import {IDevice, ICategory} from '../constants/types';
+import {Block, Button, Article, AddDevice} from '../components';
 import WifiManager from "react-native-wifi-reborn";
 
 const Home = () => {
   const data = useData();
-  const [selected, setSelected] = useState<ICategory>();
-  const [articles, setArticles] = useState<IArticle[]>([]);
-  const [categories, setCategories] = useState<ICategory[]>([]);
+  const [articles, setArticles] = useState<IDevice[]>([]);
   const {colors, gradients, sizes} = useTheme();
 
   // init articles
   useEffect(() => {
+    let devices = data?.articles;
     setArticles(data?.articles);
-    setCategories(data?.categories);
-    setSelected(data?.categories[0]);
-  }, [data.articles, data.categories]);
-
-  // update articles on category change
-  useEffect(() => {
-    const category = data?.categories?.find(
-      (category) => category?.id === selected?.id,
-    );
-
-    const newArticles = data?.articles?.filter(
-      (article) => article?.category?.id === category?.id,
-    );
-
-    setArticles(newArticles);
-  }, [data, selected, setArticles]);
+  }, [data.articles]);
 
   const wifiConnect = async (ssid) => {
     WifiManager.connectToSSID(ssid).then(
       () => {
-        console.log("Connected successfully!");
+        alert("Connected successfully!");
       },
       () => {
         console.log("Connection failed!");
       }
     );
-    
-    // WifiManager.getCurrentWifiSSID().then(
-    //   ssid => {
-    //     console.log("Your current connected wifi SSID is " + ssid);
+    // WifiManager.disconnectFromSSID(ssid).then(
+    //   () => {
+    //     alert("Disconnected successfully!");
     //   },
     //   () => {
-    //     console.log("Cannot get current SSID!");
+    //     console.log("Disconnection failed!");
     //   }
-    // );
+    // )
   }
 
   const onPress = () => {
@@ -59,14 +42,13 @@ const Home = () => {
 
   return (
     <Block>
-
       <FlatList
         data={articles}
         showsVerticalScrollIndicator={false}
         keyExtractor={(item) => `${item?.id}`}
         style={{paddingHorizontal: sizes.padding}}
         contentContainerStyle={{paddingBottom: sizes.l}}
-        renderItem={({item}) => <Article {...item} onPress={onPress}/>}
+        renderItem={({item}) => item.addDevice ? <AddDevice {...item} onPress={onPress} /> : <Article {...item} onPress={onPress} />}
       />
     </Block>
   );

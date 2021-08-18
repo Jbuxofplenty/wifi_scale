@@ -1,7 +1,7 @@
 import React, {useCallback, useState, useEffect} from 'react';
 
 import {useData, useTheme, useTranslation} from '../hooks';
-import {IArticle, ICategory} from '../constants/types';
+import {IDevice, ICategory} from '../constants/types';
 import {Block, Button, Image, Input, Product, Text} from '../components';
 
 const Products = () => {

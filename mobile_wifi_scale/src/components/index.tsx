@@ -8,6 +8,9 @@ import Checkbox from './Checkbox';
 import Image from './Image';
 import Article from './Article';
 import Product from './Product';
+import AddDevice from './AddDevice';
+import AddressCard from './AddressCard';
+import Divider from './Divider';
 
 export {
   Block,
@@ -20,4 +23,7 @@ export {
   Article,
   Product,
   Modal,
+  AddDevice,
+  AddressCard,
+  Divider,
 };

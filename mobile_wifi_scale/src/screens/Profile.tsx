@@ -3,20 +3,21 @@ import {Platform, Linking, TouchableOpacity, View} from 'react-native';
 import {Ionicons} from '@expo/vector-icons';
 import {useNavigation} from '@react-navigation/core';
 
-import {Block, Button, Image, Text} from '../components/';
-import {useData, useTheme, useTranslation} from '../hooks/';
+import { Block, Button, Image, Text, AddressCard, Divider } from '../components/';
+import { useTheme, useTranslation } from '../hooks/';
 import { logout } from '../actions/auth';
 import { updateActiveScreen } from '../actions/data';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 const isAndroid = Platform.OS === 'android';
 
 const Profile = () => {
-  const {user} = useData();
   const {t} = useTranslation();
   const navigation = useNavigation();
   const {assets, colors, sizes} = useTheme();
   const dispatch = useDispatch();
+  const {displayName, email, photoURL} = useSelector((state) => state.auth.user);
+  const prevScreen = useSelector((state) => state.data.prevScreen);
 
   const IMAGE_SIZE = (sizes.width - (sizes.padding + sizes.sm) * 2) / 3;
   const IMAGE_VERTICAL_SIZE =
@@ -25,21 +26,25 @@ const Profile = () => {
   const IMAGE_VERTICAL_MARGIN =
     (sizes.width - (IMAGE_VERTICAL_SIZE + sizes.sm) * 2) / 2;
 
-  const handleSocialLink = useCallback(
-    (type: 'twitter' | 'dribbble') => {
-      const url =
-        type === 'twitter'
-          ? `https://twitter.com/${user?.social?.twitter}`
-          : `https://dribbble.com/${user?.social?.dribbble}`;
+  const handleAmazonLink = () => {
+    const url = 'https://www.amazon.com/'
+    try {
+      Linking.openURL(url);
+    } catch (error) {
+      alert(`Cannot open URL: ${url}`);
+    }
+  };
 
-      try {
-        Linking.openURL(url);
-      } catch (error) {
-        alert(`Cannot open URL: ${url}`);
-      }
-    },
-    [user],
-  );
+  const signOff = () => {
+    dispatch(logout());
+    navigation.navigate('Home');
+    dispatch(updateActiveScreen('Home'));
+  }
+
+  const handleGoBack = () => {
+    navigation.goBack();
+    dispatch(updateActiveScreen(prevScreen));
+  }
 
   return (
     <Block safe marginTop={sizes.md}>
@@ -60,7 +65,7 @@ const Profile = () => {
               row
               flex={0}
               justify="flex-start"
-              onPress={() => navigation.goBack()}>
+              onPress={handleGoBack}>
               <Image
                 radius={0}
                 width={10}
@@ -78,45 +83,37 @@ const Profile = () => {
                 width={64}
                 height={64}
                 marginBottom={sizes.sm}
-                source={{uri: user?.avatar}}
+                source={{uri: photoURL}}
               />
               <Text h5 center white>
-                {user?.name}
+                {displayName}
               </Text>
               <Text p center white>
-                {user?.department}
+                {email}
               </Text>
               <Block row marginVertical={sizes.m}>
-                <Button
-                  white
-                  outlined
-                  shadow={false}
-                  radius={sizes.m}
-                  onPress={() => {
-                    dispatch(logout());
-                    navigation.navigate('Home');
-                    dispatch(updateActiveScreen('Home'));
-                  }}>
-                  <Block
-                    justify="center"
-                    radius={sizes.m}
-                    paddingHorizontal={sizes.m}
-                    color="rgba(255,255,255,0.2)">
-                    <Text white bold transform="uppercase">
-                      {'Sign Out'}
-                    </Text>
-                  </Block>
-                </Button>
                 <Button
                   shadow={false}
                   radius={sizes.m}
                   marginHorizontal={sizes.sm}
                   color="rgba(255,255,255,0.2)"
                   outlined={String(colors.white)}
-                  onPress={() => handleSocialLink('twitter')}>
+                  onPress={handleAmazonLink}>
                   <Ionicons
-                    size={18}
-                    name="logo-twitter"
+                    size={23}
+                    name="logo-amazon"
+                    color={colors.white}
+                  />
+                </Button>
+                <Button
+                  shadow={false}
+                  radius={sizes.m}
+                  marginHorizontal={sizes.sm}
+                  color="rgba(255,255,255,0.2)"
+                  outlined={String(colors.white)}>
+                  <Ionicons
+                    size={23}
+                    name="bar-chart-outline"
                     color={colors.white}
                   />
                 </Button>
@@ -124,12 +121,17 @@ const Profile = () => {
                   shadow={false}
                   radius={sizes.m}
                   color="rgba(255,255,255,0.2)"
+                  marginHorizontal={sizes.sm}
                   outlined={String(colors.white)}
-                  onPress={() => handleSocialLink('dribbble')}>
+                  onPress={signOff}
+                  justify="center" align="center">
                   <Ionicons
-                    size={18}
-                    name="logo-dribbble"
+                    size={25}
+                    name="log-out-outline"
                     color={colors.white}
+                    style={{
+                      marginLeft: 5
+                    }}
                   />
                 </Button>
               </Block>
@@ -156,24 +158,18 @@ const Profile = () => {
               paddingVertical={sizes.sm}
               renderToHardwareTextureAndroid>
               <Block align="center">
-                <Text h5>{user?.stats?.posts}</Text>
-                <Text>{t('profile.posts')}</Text>
+                <Text h5>0</Text>
+                <Text>Devices</Text>
               </Block>
               <Block align="center">
-                <Text h5>{(user?.stats?.followers || 0) / 1000}k</Text>
-                <Text>{t('profile.followers')}</Text>
-              </Block>
-              <Block align="center">
-                <Text h5>{(user?.stats?.following || 0) / 1000}k</Text>
-                <Text>{t('profile.following')}</Text>
+                <Text h5>0</Text>
+                <Text>{'Subscriptions'}</Text>
               </Block>
             </Block>
           </Block>
-
-          {/* profile: about me */}
-          <Block paddingHorizontal={sizes.sm}>
-          </Block>
-
+          {/* profile: address card */}
+          <AddressCard />
+          <Divider />
           {/* profile: photo album */}
           <Block paddingHorizontal={sizes.sm} marginTop={sizes.s}>
             <Block row align="center" justify="space-between">

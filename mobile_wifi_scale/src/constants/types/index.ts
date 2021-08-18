@@ -19,7 +19,7 @@ export interface ICategory {
   id?: number;
   name?: string;
 }
-export interface IArticleOptions {
+export interface IDeviceOptions {
   id?: number;
   title?: string;
   description?: string;
@@ -30,7 +30,7 @@ export interface IArticleOptions {
   user?: IUser;
   image?: string;
 }
-export interface IArticle {
+export interface IDevice {
   id?: number;
   title?: string;
   description?: string;
@@ -40,9 +40,10 @@ export interface IArticle {
   rating?: number;
   user?: IUser;
   offers?: IProduct[];
-  options?: IArticleOptions[];
+  options?: IDeviceOptions[];
   timestamp?: number;
   onPress?: (event?: any) => void;
+  addDevice?: boolean;
 }
 
 export interface IProduct {
@@ -77,12 +78,12 @@ export interface IUseData {
   setTrending: (data?: IProduct[]) => void;
   categories: ICategory[];
   setCategories: (data?: ICategory[]) => void;
-  recommendations: IArticle[];
-  setRecommendations: (data?: IArticle[]) => void;
-  articles: IArticle[];
-  setArticles: (data?: IArticle[]) => void;
-  article: IArticle;
-  handleArticle: (data?: IArticle) => void;
+  recommendations: IDevice[];
+  setRecommendations: (data?: IDevice[]) => void;
+  articles: IDevice[];
+  setArticles: (data?: IDevice[]) => void;
+  article: IDevice;
+  handleArticle: (data?: IDevice) => void;
   notifications: INotification[];
   handleNotifications: (data?: INotification[]) => void;
 }

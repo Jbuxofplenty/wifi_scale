@@ -6,7 +6,7 @@ import Text from './Text';
 import Block from './Block';
 import Image from './Image';
 import {useTheme, useTranslation} from '../hooks/';
-import {IArticle} from '../constants/types';
+import {IDevice} from '../constants/types';
 
 const Article = ({
   title,
@@ -18,7 +18,7 @@ const Article = ({
   timestamp,
   user,
   onPress,
-}: IArticle) => {
+}: IDevice) => {
   const {t} = useTranslation();
   const {colors, gradients, icons, sizes} = useTheme();
 

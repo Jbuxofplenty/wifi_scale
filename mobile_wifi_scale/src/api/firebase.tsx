@@ -49,11 +49,11 @@ export async function googleSignIn() {
         return firebase.auth().signInWithCredential(credential);
       });
     }
-    Alert.alert("There is something wrong!", logInResult);
+    Alert.alert("Error!", logInResult);
     return Promise.reject();
   })
   .catch((error) => {
-    Alert.alert("There is something wrong!", error.message);
+    Alert.alert("Error!", error.message);
     return Promise.reject();
   });
 }
@@ -68,16 +68,15 @@ export async function registerUser(username, email, password) {
         phone: "",
         address: emptyAddress,
         formattedAddress: "",
-        headshot: "https://s3.amazonaws.com/dejafood.com/mobile_assets/deja_gradient.png",
+        headshot: "",
       });
      }).catch(function(error) {
-        console.log(email)
-        Alert.alert("There is something wrong!", error.message);
-        return false;
+        Alert.alert("Error!", error.message);
+        return Promise.reject();
     });
   } catch (error) {
-    Alert.alert("There is something wrong!", error.message);
-    return false
+    Alert.alert("Error!", error.message);
+    return Promise.reject();
   }
 }
 
@@ -88,20 +87,12 @@ export async function signIn(email, password) {
     })
     return firebase.auth().currentUser;
   } catch (error) {
-    return Alert.alert("There is something wrong!", error.message);
-  }
-}
-
-export async function loggingOut() {
-  try {
-    await firebase.auth().signOut();
-  } catch (error) {
-    Alert.alert('There is something wrong!', error.message);
+    return Alert.alert("Error!", error.message);
   }
 }
 
 export async function signOut() {
-  firebase.auth().signOut();
+  await firebase.auth().signOut();
 }
 
 export async function isLoggedIn() {

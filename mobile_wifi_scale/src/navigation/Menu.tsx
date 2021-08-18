@@ -74,7 +74,6 @@ const DrawerContent = (
   const dispatch = useDispatch();
   const {assets, colors, gradients, sizes} = useTheme();
   const labelColor = colors.text;
-
   const handleNavigation = useCallback(
     (to) => {
       dispatch(updatePrevScreen(active));

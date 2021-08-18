@@ -90,6 +90,11 @@ const Register = ({ route }) => {
     return false;
   }
 
+  const handleGoBack = () => {
+    navigation.goBack();
+    dispatch(updateActiveScreen(prevScreen));
+  }
+
   const renderLoginButtons = () => {
     return (
       <>
@@ -161,10 +166,7 @@ const Register = ({ route }) => {
               row
               flex={0}
               justify="flex-start"
-              onPress={() => {
-                navigation.goBack();
-                dispatch(updateActiveScreen(prevScreen));
-              }}>
+              onPress={handleGoBack}>
               <Image
                 radius={0}
                 width={10}
