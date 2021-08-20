@@ -9,7 +9,7 @@ import WifiManager from "react-native-wifi-reborn";
 const Home = () => {
   const data = useData();
   const [articles, setArticles] = useState<IDevice[]>([]);
-  const {colors, gradients, sizes} = useTheme();
+  const { sizes } = useTheme();
 
   // init articles
   useEffect(() => {

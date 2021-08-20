@@ -195,7 +195,7 @@ const Typography = (props: ITextProps) => {
           colors={gradient}
           end={end || [0.2, 0]}
           start={start || [0, 0]}
-          style={{flex: 1, height: gradientHeight, flexWrap: 'wrap'}}
+          style={{flex: 1, height: gradientHeight, flexWrap: 'wrap', flexShrink: 1}}
         />
       </MaskedView>
     );

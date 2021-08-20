@@ -1,5 +1,5 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {Alert, Animated, Linking, StyleSheet} from 'react-native';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { Animated, Linking, StyleSheet } from 'react-native';
 
 import {
   useIsDrawerOpen,
@@ -11,8 +11,8 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 
 import Screens from './Screens';
-import {Block, Text, Switch, Button, Image} from '../components';
-import {useData, useTheme, useTranslation} from '../hooks';
+import { Block, Text, Switch, Button, Image } from '../components';
+import { useTheme, useTranslation } from '../hooks';
 import { updatePrevScreen, updateActiveScreen } from '../actions/data';
 
 const Drawer = createDrawerNavigator();

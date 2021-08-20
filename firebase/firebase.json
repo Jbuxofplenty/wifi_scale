@@ -2,5 +2,19 @@
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
+  },
+  "database": {
+    "rules": "database.json"
+  },
+  "functions": {
+
+  },
+  "emulators": {
+    "database": {
+      "port": "8083"
+    },
+    "firestore": {
+      "port": "8084"
+    }
   }
 }

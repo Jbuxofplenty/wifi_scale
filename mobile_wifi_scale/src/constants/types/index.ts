@@ -48,12 +48,14 @@ export interface IDevice {
 
 export interface IProduct {
   id?: number;
-  title?: string;
+  company?: string;
+  cost?: number;
+  shippingCost?: number;
+  tax?: number;
+  details?: Object;
+  displayName?: string;
   description?: string;
-  category?: ICategory;
-  image?: string;
-  timestamp?: number;
-  linkLabel?: string;
+  photoURL?: string;
   type: 'vertical' | 'horizontal';
 }
 export interface ILocation {

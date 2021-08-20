@@ -11,6 +11,9 @@ import Product from './Product';
 import AddDevice from './AddDevice';
 import AddressCard from './AddressCard';
 import Divider from './Divider';
+import CreditCard from './CreditCard';
+import SubscriptionSettings from './SubscriptionSettings';
+import PaymentInfo from './PaymentInfo';
 
 export {
   Block,
@@ -26,4 +29,7 @@ export {
   AddDevice,
   AddressCard,
   Divider,
+  CreditCard,
+  SubscriptionSettings,
+  PaymentInfo,
 };

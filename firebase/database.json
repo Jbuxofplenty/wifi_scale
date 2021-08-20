@@ -1,0 +1,18 @@
+{
+  "rules": {
+    "users": {
+      "$user_id": {
+        ".write": "$user_id === auth.uid",
+        ".read": "$user_id === auth.uid"
+      }
+    },
+    "products": {
+      ".write": false,
+      ".read": true
+    },
+  	"development": {
+      ".write": true,
+      ".read": true
+    }
+  }
+}

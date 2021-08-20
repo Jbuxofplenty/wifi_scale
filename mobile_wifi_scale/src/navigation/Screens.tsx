@@ -1,13 +1,12 @@
 import React from 'react';
-import {createStackNavigator} from '@react-navigation/stack';
+import { createStackNavigator } from '@react-navigation/stack';
 
-import {Home, Components, Products, Profile, Register} from '../screens';
-import {useScreenOptions, useTranslation} from '../hooks';
+import { Home, Purchase, Products, Profile, Register } from '../screens';
+import { useScreenOptions } from '../hooks';
 
 const Stack = createStackNavigator();
 
 export default () => {
-  const {t} = useTranslation();
   const screenOptions = useScreenOptions();
 
   return (
@@ -28,6 +27,12 @@ export default () => {
       <Stack.Screen
         name="Profile"
         component={Profile}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="Purchase"
+        component={Purchase}
         options={{headerShown: false}}
       />
 

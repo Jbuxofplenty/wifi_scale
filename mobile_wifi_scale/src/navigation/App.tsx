@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import {Platform, StatusBar} from 'react-native';
+import React, {useEffect} from 'react';
+import {Platform, StatusBar, LogBox} from 'react-native';
 import {useFonts} from 'expo-font';
 import AppLoading from 'expo-app-loading';
 import {NavigationContainer, DefaultTheme} from '@react-navigation/native';
@@ -10,9 +10,12 @@ import {useData, ThemeProvider, TranslationProvider} from '../hooks';
 import {fire} from '../api/firebase';
 import {loggedIn, loggedOut} from '../actions/auth';
 
+LogBox.ignoreLogs(['Warning: ...']); // Ignore log notification by message
+LogBox.ignoreAllLogs();//Ignore all log notifications
+
 export default () => {
   const {isDark, theme, setTheme} = useData();
-  const isLoggedIn = useSelector((state) => state.auth.user ? true : false);
+  const isLoggedIn = useSelector((state) => state.auth.userData ? true : false);
   const dispatch = useDispatch();
 
   useEffect(() => {

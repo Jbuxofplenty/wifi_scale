@@ -44,7 +44,7 @@ const Register = ({ route }) => {
   });
 
   const {assets, colors, gradients, sizes} = useTheme();
-  const { user } = useSelector((state) => state.auth);
+  const { userData } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const prevScreen = useSelector((state) => state.data.prevScreen);
 
@@ -56,11 +56,11 @@ const Register = ({ route }) => {
   );
 
   useEffect(() => {
-    if(user) {
+    if(userData) {
       navigation.navigate('Home');
       dispatch(updateActiveScreen('Home'));
     }
-  }, [user]);
+  }, [userData]);
 
   const handleSignUp = useCallback(() => {
     if (buttonsEnabled()) {

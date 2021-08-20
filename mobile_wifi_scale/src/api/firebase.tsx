@@ -28,7 +28,7 @@ const emptyAddress = {
 export const fire = firebase;
 
 export async function googleSignIn() {
-  GoogleAuthentication.logInAsync({
+  return GoogleAuthentication.logInAsync({
     // Use client ID's of google cloud api keys for ios and android (auto-generated when a new app is added to firebase)
     // host.exp.exponent must be specified as bundle ID in API key when using expo go
     androidClientId: apiKeys.androidGoogleSignInWebClientId,
@@ -49,13 +49,46 @@ export async function googleSignIn() {
         return firebase.auth().signInWithCredential(credential);
       });
     }
-    Alert.alert("Error!", logInResult);
     return Promise.reject();
   })
   .catch((error) => {
-    Alert.alert("Error!", error.message);
+    Alert.alert(error.message);
     return Promise.reject();
   });
+}
+
+export async function updateUser(user) {
+  var userId = firebase.auth().currentUser.uid;
+  // Set the user data
+  return firebase.database().ref(debug + '/users/' + userId).update(user);
+}
+
+export async function retrieveUser() {
+  var userId = firebase.auth().currentUser.uid;
+  // Get the user data
+  var snapshot = await firebase.database().ref(debug + '/users/' + userId).once('value')
+    .catch(function(error) {
+      Alert.alert(error.message);
+      Promise.reject();
+    });
+  
+  if (snapshot.exists()) {
+    return snapshot.val();
+  }
+  return false; 
+}
+
+export async function retrieveProducts() {
+  var snapshot = await firebase.database().ref(debug + '/products').once('value')
+    .catch(function(error) {
+      Alert.alert(error.message);
+      Promise.reject();
+    });
+  
+  if (snapshot.exists()) {
+    return snapshot.val().filter(x => x !== undefined);;
+  }
+  return false; 
 }
 
 export async function registerUser(username, email, password) {
@@ -85,7 +118,6 @@ export async function signIn(email, password) {
     return firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(async () => {
       return firebase.auth().signInWithEmailAndPassword(email.trim(), password.trim());
     })
-    return firebase.auth().currentUser;
   } catch (error) {
     return Alert.alert("Error!", error.message);
   }

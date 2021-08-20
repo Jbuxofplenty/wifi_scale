@@ -184,6 +184,12 @@ export interface IBlockProps
    */
   align?: ViewStyle['alignItems'];
   /**
+   * Renders a flex alignItems
+   * Available values: 'auto', 'flex-start', 'flex-end', 'center', 'stretch', 'baseline'
+   * @see https://reactnative.dev/docs/layout-props#alignitems
+   */
+  alignSelf?: ViewStyle['alignSelf'];
+  /**
    * Renders the View content
    */
   children?: React.ReactNode;

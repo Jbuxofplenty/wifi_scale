@@ -2,11 +2,13 @@ import {
   DATA_RESET,
   DATA_PREV_SCREEN_UPDATE,
   DATA_ACTIVE_SCREEN_UPDATE,
+  DATA_UPDATE_PRODUCTS,
 } from '../constants/data';
 
 const INITIAL_STATE = {
   prevScreen: 'Home',
   activeScreen: 'Home',
+  products: [],
 };
 
 export default function (state = INITIAL_STATE, action) {
@@ -28,6 +30,13 @@ export default function (state = INITIAL_STATE, action) {
       return {
         ...state,
         activeScreen: action.payload,
+      };
+    }
+
+    case DATA_UPDATE_PRODUCTS: {
+      return {
+        ...state,
+        products: action.payload,
       };
     }
 

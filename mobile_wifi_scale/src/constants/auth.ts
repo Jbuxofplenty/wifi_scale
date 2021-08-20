@@ -4,3 +4,4 @@ export const AUTH_LOGGED_IN = '[AUTH] LOGGED_IN';
 export const AUTH_ERR_LOG_IN = '[AUTH] ERR_LOG_IN';
 export const AUTH_ERR_LOG_OUT = '[AUTH] AUTH_ERR_LOG_OUT';
 export const AUTH_LOGOUT = '[AUTH] LOGOUT';
+export const AUTH_UPDATE_USER = '[AUTH] UPDATE_USER';

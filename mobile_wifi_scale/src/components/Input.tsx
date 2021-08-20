@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   Image,
   TextInput,
@@ -12,7 +12,7 @@ import Block from './Block';
 import Text from './Text';
 
 import useTheme from '../hooks/useTheme';
-import {IInputProps} from '../constants/types';
+import { IInputProps } from '../constants/types';
 
 const Input = ({
   id = 'Input',

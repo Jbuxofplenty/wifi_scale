@@ -5,14 +5,16 @@ import {
   AUTH_LOGGING_IN,
   AUTH_LOGGING_OUT,
   AUTH_LOGOUT,
+  AUTH_UPDATE_USER,
 } from '../constants/auth';
 
 const INITIAL_STATE = {
-  user: null,
+  user: { displayName: "", email: "", photoURL: "" },
   loggingIn: false,
   loggingOut: false,
   errorMessageLogin: null,
   errorMessageLogout: null,
+  userData: null,
 };
 
 export default function (state = INITIAL_STATE, action) {
@@ -37,6 +39,14 @@ export default function (state = INITIAL_STATE, action) {
         ...state,
         errorMessageLogout: action.payload ? null : state.errorMessageLogout,
         loggingOut: action.payload,
+      };
+    }
+
+    case AUTH_UPDATE_USER: {
+      let { userData } = action.payload;
+      return {
+        ...state,
+        userData,
       };
     }
 

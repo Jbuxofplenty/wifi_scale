@@ -1,42 +1,43 @@
-import React, {useCallback, useState, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
-import {useData, useTheme, useTranslation} from '../hooks';
-import {IDevice, ICategory} from '../constants/types';
-import {Block, Button, Image, Input, Product, Text} from '../components';
+import {useData, useTheme} from '../hooks';
+import {ICategory} from '../constants/types';
+import {Block, Button, Input, Product, Text} from '../components';
 
 const Products = () => {
-  const {t} = useTranslation();
   const data = useData();
-  const {following} = data;
-  const [products, setProducts] = useState(following);
-  const {assets, colors, fonts, gradients, sizes} = useTheme();
+  const allProducts = useSelector((state) => state.data.products);
+  const [products, setProducts] = useState(allProducts);
+  const {colors, gradients, sizes} = useTheme();
   const [selected, setSelected] = useState<ICategory>();
   const [categories, setCategories] = useState<ICategory[]>([]);
+  console.log(allProducts)
 
   // init articles
   useEffect(() => {
     setCategories(data?.categories);
     setSelected(data?.categories[0]);
-  }, [data.articles, data.categories]);
+  }, [data.categories]);
 
-  // update articles on category change
+  // update products on category change
   useEffect(() => {
     const category = data?.categories?.find(
       (category) => category?.id === selected?.id,
     );
 
-    const newFollowing = data?.following?.filter(
+    const newProducts = allProducts?.filter(
       (article) => article?.category?.id === category?.id,
     );
 
-    setProducts(newFollowing);
+    setProducts(newProducts);
   }, [data, selected, setProducts]);
 
   return (
     <Block>
       {/* search input */}
       <Block color={colors.card} flex={0} padding={sizes.padding}>
-        <Input search placeholder={t('common.search')} />
+        <Input search placeholder={'Search'} />
       </Block>
 
       {/* categories list */}

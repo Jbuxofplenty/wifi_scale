@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {useTheme} from '../hooks/';
-import {Block, Text} from '../components/';
+import Block from './Block';
 
 const Divider = () => {
   const {gradients, sizes} = useTheme();
@@ -12,6 +12,8 @@ const Divider = () => {
       flex={0}
       align="center"
       justify="center"
+      alignSelf="center"
+      width="100%"
       marginVertical={sizes.sm}
       paddingHorizontal={sizes.xxl}>
       <Block

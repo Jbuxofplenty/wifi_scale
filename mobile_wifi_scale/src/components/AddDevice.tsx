@@ -1,14 +1,14 @@
 import React from 'react';
-import {TouchableOpacity} from 'react-native';
+import { TouchableOpacity } from 'react-native';
 
 import Text from './Text';
 import Block from './Block';
 import Image from './Image';
-import {useTheme, useTranslation} from '../hooks/';
-import {Ionicons} from '@expo/vector-icons';
+import { useTheme } from '../hooks/';
+import { Ionicons } from '@expo/vector-icons';
 
 const AddDevice = ({onPress}) => {
-  const {colors, gradients, icons, sizes, assets} = useTheme();
+  const { colors, sizes, assets } = useTheme();
 
   // render card for Newest & Fashion
   return (

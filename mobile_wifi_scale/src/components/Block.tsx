@@ -71,6 +71,7 @@ const Block = (props: IBlockProps) => {
     bottom,
     end,
     start,
+    alignSelf,
     ...rest
   } = props;
   const {colors, sizes} = useTheme();
@@ -149,6 +150,7 @@ const Block = (props: IBlockProps) => {
       ...(overflow && {overflow}),
       ...(flex !== undefined && {flex}),
       ...(row && {flexDirection: 'row'}),
+      ...(alignSelf && {alignSelf: align}),
       ...(align && {alignItems: align}),
       ...(center && {justifyContent: 'center'}),
       ...(justify && {justifyContent: justify}),
