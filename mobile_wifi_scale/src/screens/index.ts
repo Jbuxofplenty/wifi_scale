@@ -4,3 +4,6 @@ export {default as Products} from './Products';
 export {default as Profile} from './Profile';
 export {default as Register} from './Register';
 export {default as Purchase} from './Purchase';
+export {default as SetupScale} from './SetupScale';
+export {default as Scale} from './Scale';
+

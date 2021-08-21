@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { getProducts } from "../actions/data";
 
 import {useData, useTheme} from '../hooks';
 import {ICategory} from '../constants/types';
@@ -12,7 +13,13 @@ const Products = () => {
   const {colors, gradients, sizes} = useTheme();
   const [selected, setSelected] = useState<ICategory>();
   const [categories, setCategories] = useState<ICategory[]>([]);
-  console.log(allProducts)
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if(!allProducts.length) {
+      dispatch(getProducts());
+    }
+  }, []);
 
   // init articles
   useEffect(() => {
@@ -31,7 +38,7 @@ const Products = () => {
     );
 
     setProducts(newProducts);
-  }, [data, selected, setProducts]);
+  }, [selected, setProducts, allProducts]);
 
   return (
     <Block>

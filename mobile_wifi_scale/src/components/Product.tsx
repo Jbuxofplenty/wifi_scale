@@ -18,7 +18,7 @@ const Product = (props: IProduct) => {
 
   const isHorizontal = type !== 'vertical';
   const CARD_WIDTH = (sizes.width - sizes.padding * 2 - sizes.sm) / 2;
-
+  
   const navigate = () => {
     dispatch(updatePrevScreen('Products'));
     dispatch(updateActiveScreen('Purchase'));

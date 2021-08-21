@@ -32,7 +32,6 @@ export const TranslationProvider = ({
   const getLocale = useCallback(async () => {
     // get preferance gtom storage
     const localeJSON = await Storage.getItem('locale');
-    console.log(localeJSON)
     // set Locale / compare if has updated
     setLocale(localeJSON !== null ? localeJSON : 'en-US');
   }, [setLocale]);

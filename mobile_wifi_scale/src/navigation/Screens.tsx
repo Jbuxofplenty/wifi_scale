@@ -1,7 +1,7 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import { Home, Purchase, Products, Profile, Register } from '../screens';
+import { Home, Purchase, Products, Profile, Register, SetupScale, Scale } from '../screens';
 import { useScreenOptions } from '../hooks';
 
 const Stack = createStackNavigator();
@@ -27,6 +27,18 @@ export default () => {
       <Stack.Screen
         name="Profile"
         component={Profile}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="Setup Scale"
+        component={SetupScale}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="Scale"
+        component={Scale}
         options={{headerShown: false}}
       />
 

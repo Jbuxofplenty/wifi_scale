@@ -17,8 +17,6 @@ import {
   updateUser,
 } from '../api/firebase';
 
-import { getProducts } from "./data";
-
 const defaultUserData = {
   name: "",
   email: "",
@@ -70,7 +68,6 @@ export const googleLogin = () => (dispatch) => {
   googleSignIn().then(async (res) => {
     await dispatch(loggedIn({ user: res.user }));
     await dispatch(getUserData());
-    await dispatch(getProducts());
   }).catch((err) => {
     dispatch(errorLogIn(err));
   }).finally(() => {
@@ -83,7 +80,6 @@ export const login = (email, password) => (dispatch) => {
   signIn(email, password).then(async (res) => {
     await dispatch(loggedIn({ user: res }));
     await dispatch(getUserData());
-    await dispatch(getProducts());
   }).catch((err) => {
     dispatch(errorLogIn(err));
   }).finally(() => {

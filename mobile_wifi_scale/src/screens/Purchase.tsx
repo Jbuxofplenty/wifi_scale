@@ -19,6 +19,7 @@ const Purchase = (props) => {
   const totalCost = (cost + shippingCost) * (1 + tax);
   const detailsArray = Object.entries(details);
   const { userData } = useSelector((state) => state.auth);
+  const isLoggedIn = useSelector((state) => state.auth.userData ? true : false);
   const formattedAddress = userData && userData.address ? userData.address.formattedAddress : "";
   const valid = false;
 
@@ -31,6 +32,11 @@ const Purchase = (props) => {
   const handleGoBack = () => {
     navigation.goBack();
     dispatch(updateActiveScreen(prevScreen));
+  }
+
+  const navigate = () => {
+    dispatch(updateActiveScreen('Register'));
+    navigation.navigate('Register');
   }
 
   return (
@@ -132,34 +138,49 @@ const Purchase = (props) => {
           ))}
           <Divider />
 
-          <SubscriptionSettings />
-          <Divider />
-
-          {/* profile: shipping address */}
-          <Block paddingHorizontal={sizes.sm} marginVertical={sizes.sm}>
-            <Block row align="center" justify="center">
-              <Text h5 semibold>
-                {'Shipping Address'}
+          {isLoggedIn &&
+            <>
+              <SubscriptionSettings />
+              <Divider />
+    
+              {/* profile: shipping address */}
+              <Block paddingHorizontal={sizes.sm} marginVertical={sizes.sm}>
+                <Block row align="center" justify="center">
+                  <Text h5 semibold>
+                    {'Shipping Address'}
+                  </Text>
+                </Block> 
+                <Block row align="center" alignSelf="center" width={"80%"} justify="center" marginVertical={sizes.sm}>
+                  <Text align="center">{formattedAddress}</Text>
+                </Block>
+              </Block>
+              <Divider />
+    
+              <PaymentInfo cost={cost} tax={tax} shippingCost={shippingCost} total={totalCost}/>
+    
+              <Button
+                onPress={handlePurchase}
+                marginVertical={sizes.s}
+                marginHorizontal={sizes.sm}
+                gradient={gradients.primary}
+                disabled={!valid}>
+                <Text bold white transform="uppercase">
+                  {'Purchase'}
+                </Text>
+              </Button>
+            </>
+          }
+          {!isLoggedIn &&
+            <Button
+              onPress={navigate}
+              marginVertical={sizes.s}
+              marginHorizontal={sizes.sm}
+              gradient={gradients.primary}>
+              <Text bold white transform="uppercase">
+                {'Login'}
               </Text>
-            </Block> 
-            <Block row align="center" alignSelf="center" width={"80%"} justify="center" marginVertical={sizes.sm}>
-              <Text align="center">{formattedAddress}</Text>
-            </Block>
-          </Block>
-          <Divider />
-
-          <PaymentInfo cost={cost} tax={tax} shippingCost={shippingCost} total={totalCost}/>
-
-          <Button
-            onPress={handlePurchase}
-            marginVertical={sizes.s}
-            marginHorizontal={sizes.sm}
-            gradient={gradients.primary}
-            disabled={!valid}>
-            <Text bold white transform="uppercase">
-              {'Purchase'}
-            </Text>
-          </Button>
+            </Button>
+          }
         </Block>
       </Block>
     </Block>

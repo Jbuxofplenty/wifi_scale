@@ -39,7 +39,6 @@ const CreditCard = () => {
   }
 
   const onCardEdit = (cardDetails) => {
-    console.log(cardDetails);
     setIsValid(cardDetails.valid);
     setTempCard({...cardDetails.values})
   }
