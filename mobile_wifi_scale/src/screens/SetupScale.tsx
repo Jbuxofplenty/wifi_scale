@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/core';
@@ -6,37 +6,58 @@ import { useDispatch, useSelector } from 'react-redux';
 import {LinearGradient} from 'expo-linear-gradient';
 import * as Progress from 'react-native-progress';
 import WifiManager from "react-native-wifi-reborn";
+import DropDownPicker from 'react-native-dropdown-picker';
 
-import { Block, Button, Image, Text } from '../components/';
+import { Block, Button, Image, Text, Input } from '../components/';
 import { useTheme } from '../hooks/';
 import { updateActiveScreen } from '../actions/data';
-import { retrieveSSIDs } from '../api/scale';
+import { retrieveSSIDs, retrieveScaleMAC, connectToSSID } from '../api/scale';
+import { setUserData } from '../actions/auth';
 
 const welcomeMessage = 'We will attempt to hook up your scale ' +
 'to your home network.  We will first connect to the scale with this phone and upon a successful ' +
 'connection, we will have you select your network and send over the password. ' + 
 'Make sure your device is powered on!';
 
+const defaultDevice = {
+  currentlySubscribed: false,
+  percentThreshold: 10,
+}
+
 const SetupScale = (props) => {
   const navigation = useNavigation();
   const { assets, colors, sizes, gradients } = useTheme();
   const dispatch = useDispatch();
   const prevScreen = useSelector((state) => state.data.prevScreen);
+  const [showWelcome, setShowWelcome] = useState(true);
   const [inProgress, setInProgress] = useState(false);
   const [message, setMessage] = useState(welcomeMessage);
-  const [savedSSID, setSavedSSID] = useState("");
   const [currentSSID, setCurrentSSID] = useState("");
   const [fetchingSSID, setFetchingSSID] = useState(false);
+  const [selectedSSID, setSelectedSSID] = useState("");
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickingNetwork, setPickingNetwork] = useState(false);
+  const [mac, setMac] = useState("");
+  const [password, setPassword] = useState("");
+  const { userData } = useSelector((state) => state.auth);
+  let intervalId = useRef(null)
+
+  const [items, setItems] = useState([
+    {label: 'SkyNet  25%', value: 'SkyNet'},
+    {label: 'Testnet  50%', value: 'TestNet'}
+  ]);
 
   const handleSetupScale = () => {
+    setShowWelcome(false);
     setInProgress(true);
     setMessage('Attempting to connect to the wifi-scale with this phone!');
     wifiConnect('WifiScale');
   }
 
   const handleGoBack = () => {
-    if(inProgress && savedSSID !== "" && savedSSID !== currentSSID) {
-      wifiDisconnect(currentSSID);
+    setMessage(currentSSID);
+    if(currentSSID === "WifiScale") {
+      wifiDisconnect();
     }
     navigation.goBack();
     dispatch(updateActiveScreen(prevScreen));
@@ -47,27 +68,87 @@ const SetupScale = (props) => {
       setFetchingSSID(true);
       await WifiManager.getCurrentWifiSSID().then(
         ssid => {
-          if(savedSSID === "") setSavedSSID(ssid);
           setCurrentSSID(ssid);
           setFetchingSSID(false);
-          console.log(currentSSID, savedSSID)
         },
         () => {
-          setSavedSSID("");
           setFetchingSSID(false);
         }
       );
     }
     if(!fetchingSSID) fetchMyAPI();
-  }, [inProgress, setCurrentSSID, setFetchingSSID]);
+  }, [setCurrentSSID, setFetchingSSID, message]);
 
   const getSSIDs = async () => {
-    const { ssids, signalStrengths } = await retrieveSSIDs();
-    let text = "";
-    for (let i = 0; i < signalStrengths.length; i++) {
-      text += ssids[i] + " " + signalStrengths[i] + "\n";
+    setSelectedSSID("");
+    setPassword("");
+    setPickerOpen(false);
+    setMessage("Connected to the scale successfully! Retrieving a list of SSID's this scale can connect to.");
+    setPickingNetwork(false);
+    setTimeout(async () => {
+      let newMac = await retrieveScaleMAC();
+      setMac(newMac);
+      const { ssids, signalStrengths } = await retrieveSSIDs();
+      let newItems = [];
+      for (let i = 0; i < signalStrengths.length; i++) {
+        let label = ssids[i] + '  ' + signalStrengths[i];
+        let value = ssids[i]; 
+        newItems.push({label, value});
+      }
+      if(newItems.length) {
+        setItems(newItems);
+        setMessage("Please select the SSID you'd like to connect the scale to and provide its password");
+        setPickingNetwork(true);
+      }
+      else {
+        setInProgress(false);
+        setMessage("No SSID's were found! Please try again.")
+      } 
+    }, 1000);
+  }
+
+  const isScaleOnline = (online) => {
+    setInProgress(false);
+    if(online) {
+      setMessage("Scale setup successful!  Return to the previous screen to add a subscription.");
     }
-    setMessage(text);
+    else {
+      setMessage("Scale setup unsuccessful!  We were unable to find the scale online.  Please try again.");
+    }
+  }
+
+  const checkScaleOnline = async () => {
+    return false;
+  }
+
+  const waitForScale = async () => {
+    setMessage("Waiting for the scale to come online!");
+    let success = false;
+    let i = 0;
+    intervalId.current = setInterval(async () => {
+      if (i >= 10 || success) {
+       clearInterval(intervalId.current);
+       isScaleOnline(success);
+      } else {
+        success = await checkScaleOnline();
+        i++;
+      }
+     }, 1000);
+  }
+
+  const updateScaleOwner = async () => {
+    setMessage("Associating this scale with your user account!");
+    if(mac !== "") {
+      let newUser = {...userData};
+      if(!("devices" in newUser)) newUser.devices = {};
+      newUser.devices[mac] = defaultDevice;
+      dispatch(setUserData(newUser));
+      setTimeout(() => { waitForScale() }, 1000);
+    }
+    else {
+      setInProgress(false);
+      setMessage("Unable to obtain the mac address of the scale!  This is required to associate the scale with your account.  Please try again.")
+    }
   }
 
   const wifiConnect = async (ssid) => {
@@ -75,25 +156,61 @@ const SetupScale = (props) => {
       async () => {
         setMessage("Connected to the scale successfully! Retrieving a list of SSID's this scale can connect to.");
         // Wait for the connection to be established before making http requests
-        setTimeout(() => { getSSIDs() }, 3000);
+        setTimeout(() => { getSSIDs() }, 6000);
       },
       () => {
-        setMessage("Connection failed to the scale! Ensure it is turned on a reset to factory settings.");
+        setMessage("Connection failed to the scale! Ensure it is turned on and reset to factory settings.");
         setInProgress(false);
       }
     );
   }
 
-  const wifiDisconnect = async (ssid) => {
-    WifiManager.disconnectFromSSID(ssid).then(
+  const wifiDisconnect = async () => {
+    WifiManager.disconnectFromSSID("WifiScale").then(
       () => {
-        alert("Disconnected successfully!");
+        console.log("Disconnected successfully!");
       },
       () => {
         console.log("Disconnection failed!");
       }
     )
   }
+
+  const sendNetworkInfo = async () => {
+    // let data = {s: selectedSSID, p: password};
+    let data = 's=' + selectedSSID + '&p=' + password;
+    setMessage(data);
+    setInProgress(true);
+    await connectToSSID(data);
+    wifiDisconnect();
+    setMessage("Sent network details successfully! Disconnecting from the scale...");
+    setPickingNetwork(false);
+
+    // Wait for the connection to be established before making http requests
+    setTimeout(() => { updateScaleOwner() }, 10000);
+  }
+  
+  const renderConnectHelper = () => (
+    <Block align="center" alignSelf="center" width={"95%"} justify="center" marginVertical={sizes.md}>
+      <Block marginBottom={sizes.sm} width="100%">
+        <Input 
+          marginBottom={sizes.m}
+          placeholder={'Network Password'}
+          onChangeText={(value) => setPassword(value)}
+          secureTextEntry
+        />
+        <DropDownPicker
+          open={pickerOpen}
+          value={selectedSSID}
+          items={items}
+          setOpen={setPickerOpen}
+          setValue={setSelectedSSID}
+          setItems={setItems}
+          placeholder="Select a Network"
+        />
+      </Block>
+    </Block>
+  )
 
   return (
     <LinearGradient
@@ -108,25 +225,40 @@ const SetupScale = (props) => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{paddingBottom: sizes.padding}}>
           <Block>
-            <Button
-              row
-              flex={0}
-              justify="flex-start"
-              onPress={handleGoBack}>
-              <Image
-                radius={0}
-                width={10}
-                height={18}
-                color={colors.white}
-                source={assets.arrow}
-                transform={[{rotate: '180deg'}]}
-              />
-              <Text p white marginLeft={sizes.s}>
-                {'Cancel Setup'}
-              </Text>
-            </Button>
+            <Block row flex={0} justify='space-between'>
+              <Button
+                row
+                flex={0}
+                justify="flex-start"
+                onPress={handleGoBack}>
+                <Image
+                  radius={0}
+                  width={10}
+                  height={18}
+                  color={colors.white}
+                  source={assets.arrow}
+                  transform={[{rotate: '180deg'}]}
+                />
+                <Text p white marginLeft={sizes.s}>
+                  {'Cancel Setup'}
+                </Text>
+              </Button>
+              {pickingNetwork && 
+                <Button
+                  row
+                  flex={0}
+                  justify="flex-end"
+                  onPress={getSSIDs}>
+                  <Ionicons
+                    name='refresh'
+                    size={25}
+                    color={colors.white}
+                  />
+                </Button>
+              }
+            </Block>
             <Block align="center" alignSelf="center" width={"80%"} justify="center" marginVertical={sizes.sm}>
-              {!inProgress && 
+              {showWelcome && 
                 <Text bold white align="center" size={20} marginBottom={sizes.md}>
                   {'Welcome to the wifi scale setup screen!'}
                 </Text>
@@ -134,19 +266,20 @@ const SetupScale = (props) => {
               <Text bold white align="center">
                 {message}
               </Text>
+              {pickingNetwork && renderConnectHelper()}
             </Block>
-              {inProgress ? 
+              {inProgress && !pickingNetwork ? 
                 <Block align="center" alignSelf="center" width={"80%"} justify="center" marginVertical={sizes.sm}>
                   <Progress.CircleSnail size={100} indeterminate={true} color={'white'} /> 
                 </Block>
                 :
                 <Button
-                  onPress={handleSetupScale}
+                  onPress={pickingNetwork ? sendNetworkInfo : handleSetupScale}
                   marginVertical={sizes.s}
                   marginHorizontal={sizes.sm}
                   gradient={gradients.secondary}>
                   <Text bold white transform="uppercase">
-                    {'Start'}
+                    {pickingNetwork ? 'Send network info' : 'Start'}
                   </Text>
                 </Button>
               }

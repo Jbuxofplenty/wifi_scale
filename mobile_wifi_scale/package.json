@@ -34,6 +34,7 @@
     "react-dom": "16.13.1",
     "react-native": "~0.63.4",
     "react-native-credit-card-input": "^0.4.1",
+    "react-native-dropdown-picker": "^5.1.23",
     "react-native-geocoding": "^0.5.0",
     "react-native-gesture-handler": "~1.10.2",
     "react-native-google-places-autocomplete": "^2.4.1",

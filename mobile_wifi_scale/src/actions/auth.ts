@@ -23,7 +23,7 @@ const defaultUserData = {
   address: {},
   formattedAddress: "",
   card: {},
-  devices: [],
+  devices: {},
 }
 
 export const loggingIn = (loggingIn) => ({

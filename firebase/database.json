@@ -9,6 +9,12 @@
     "products": {
       ".write": false,
       ".read": true
+    }, 
+  	"devices": {
+      "$device_mac": {
+        ".write": "root.child('users/' + auth.uid + '/devices/' + $device_mac).exists()",
+        ".read": "root.child('users/' + auth.uid + '/devices/' + $device_mac).exists()"
+      }
     },
   	"development": {
       ".write": true,

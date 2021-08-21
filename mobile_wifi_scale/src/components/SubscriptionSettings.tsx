@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import { StyleSheet } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
-import SelectDropdown from 'react-native-select-dropdown';
-import FontAwesome from "react-native-vector-icons/FontAwesome";
 import Slider from '@react-native-community/slider';
+import DropDownPicker from 'react-native-dropdown-picker';
 
 import Text from './Text';
 import Block from './Block';
@@ -15,7 +14,10 @@ const SubscriptionSettings = () => {
   const {sizes} = useTheme();
   const { userData } = useSelector((state) => state.auth);
   const [percentThreshold, setPercentThreshold] = useState(10);
-  const devices = [];
+  const devices = [{value: 'Kitchen Scale', label:'Kitchen Scale'}];
+  const [pickerOpen, setPickerOpen] = useState(false);
+
+  const [device, setDevice] = useState(null);
 
   const handleSlider = (value) => {
     setPercentThreshold(value);
@@ -30,30 +32,13 @@ const SubscriptionSettings = () => {
       </Block>
       <Block justify="center" alignSelf="center" marginBottom={sizes.sm} marginTop={sizes.md} width="100%">
         <Block justify="center" alignSelf="center" align="center" width="80%">
-          <SelectDropdown
-            data={devices}
-            // defaultValueByIndex={1}
-            onSelect={(selectedItem, index) => {
-              console.log(selectedItem, index);
-            }}
-            defaultButtonText={"Select scale"}
-            buttonTextAfterSelection={(selectedItem, index) => {
-              return selectedItem;
-            }}
-            rowTextForSelection={(item, index) => {
-              return item;
-            }}
-            buttonStyle={styles.dropdown2BtnStyle}
-            buttonTextStyle={styles.dropdown2BtnTxtStyle}
-            renderDropdownIcon={() => {
-              return (
-                <FontAwesome name="chevron-down" color={"#FFF"} size={16} />
-              );
-            }}
-            dropdownIconPosition={"right"}
-            dropdownStyle={styles.dropdown2DropdownStyle}
-            rowStyle={styles.dropdown2RowStyle}
-            rowTextStyle={styles.dropdown2RowTxtStyle}
+          <DropDownPicker
+            open={pickerOpen}
+            value={device}
+            items={devices}
+            setOpen={setPickerOpen}
+            setValue={setDevice}
+            placeholder="Select a Device"
           />
           <Block row wrap='wrap' justify='space-between' width="100%" marginTop={sizes.md}>
             <Text p align="center" size={14}>Purchase Threshold: </Text>

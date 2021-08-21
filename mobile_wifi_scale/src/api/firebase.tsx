@@ -52,7 +52,7 @@ export async function googleSignIn() {
     return Promise.reject();
   })
   .catch((error) => {
-    Alert.alert(error.message);
+    console.log(error.message);
     return Promise.reject();
   });
 }
@@ -60,7 +60,10 @@ export async function googleSignIn() {
 export async function updateUser(user) {
   var userId = firebase.auth().currentUser.uid;
   // Set the user data
-  return firebase.database().ref(debug + '/users/' + userId).update(user);
+  return firebase.database().ref(debug + '/users/' + userId).update(user).catch(function(error) {
+    console.log(error.message);
+    Promise.reject();
+  });
 }
 
 export async function retrieveUser() {
@@ -68,10 +71,9 @@ export async function retrieveUser() {
   // Get the user data
   var snapshot = await firebase.database().ref(debug + '/users/' + userId).once('value')
     .catch(function(error) {
-      Alert.alert(error.message);
+      console.log(error.message);
       Promise.reject();
     });
-  
   if (snapshot.exists()) {
     return snapshot.val();
   }
@@ -81,7 +83,7 @@ export async function retrieveUser() {
 export async function retrieveProducts() {
   var snapshot = await firebase.database().ref(debug + '/products').once('value')
     .catch(function(error) {
-      Alert.alert(error.message);
+      console.log(error.message);
       Promise.reject();
     });
   
@@ -104,11 +106,11 @@ export async function registerUser(username, email, password) {
         headshot: "",
       });
      }).catch(function(error) {
-        Alert.alert("Error!", error.message);
+        console.log("Error!", error.message);
         return Promise.reject();
     });
   } catch (error) {
-    Alert.alert("Error!", error.message);
+    console.log("Error!", error.message);
     return Promise.reject();
   }
 }
@@ -119,7 +121,7 @@ export async function signIn(email, password) {
       return firebase.auth().signInWithEmailAndPassword(email.trim(), password.trim());
     })
   } catch (error) {
-    return Alert.alert("Error!", error.message);
+    return console.log("Error!", error.message);
   }
 }
 

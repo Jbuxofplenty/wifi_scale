@@ -30,16 +30,14 @@ const Home = () => {
 
   const navigate = () => {
     dispatch(updatePrevScreen('Home'));
-    dispatch(updateActiveScreen('Setup Scale'));
-    navigation.navigate('Setup Scale');
-    // if(!isLoggedIn) {
-    //   dispatch(updateActiveScreen('Register'));
-    //   navigation.navigate('Register');
-    // }
-    // else {
-    //   dispatch(updateActiveScreen('Setup Scale'));
-    //   navigation.navigate('Setup Scale');
-    // }
+    if(!isLoggedIn) {
+      dispatch(updateActiveScreen('Register'));
+      navigation.navigate('Register');
+    }
+    else {
+      dispatch(updateActiveScreen('Setup Scale'));
+      navigation.navigate('Setup Scale');
+    }
   }
 
   return (
