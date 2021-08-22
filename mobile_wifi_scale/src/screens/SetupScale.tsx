@@ -12,6 +12,7 @@ import { useTheme } from '../hooks/';
 import { updateActiveScreen } from '../actions/data';
 import { retrieveSSIDs, retrieveScaleMAC, connectToSSID } from '../api/scale';
 import { setUserData } from '../actions/auth';
+import { getDevices, removeDevice } from '../actions/data';
 import { checkScaleOnline } from '../api/firebase';
 
 const welcomeMessage = 'We will attempt to hook up your scale ' +
@@ -21,7 +22,7 @@ const welcomeMessage = 'We will attempt to hook up your scale ' +
 
 const defaultDevice = {
   currentlySubscribed: false,
-  percentThreshold: 10,
+  percentThreshold: 20,
   purchase: true,
 }
 
@@ -41,7 +42,8 @@ const SetupScale = (props) => {
   const [mac, setMac] = useState("");
   const [password, setPassword] = useState("");
   const { userData } = useSelector((state) => state.auth);
-  let intervalId = useRef(null)
+  let intervalId = useRef(null);
+  const [success, setSuccess] = useState(false);
 
   const [items, setItems] = useState();
 
@@ -53,9 +55,14 @@ const SetupScale = (props) => {
   }
 
   const handleGoBack = () => {
-    setMessage(currentSSID);
     if(currentSSID === "WifiScale") {
       wifiDisconnect();
+    }
+    if(mac !== "" && !success) {
+      dispatch(removeDevice(mac.replace(/:/g, "")));
+    }
+    if(success) {
+      dispatch(getDevices());
     }
     navigation.goBack();
     dispatch(updateActiveScreen(prevScreen));
@@ -109,18 +116,20 @@ const SetupScale = (props) => {
     setInProgress(false);
     if(online) {
       setMessage("Scale setup successful!  Return to the previous screen to add a subscription.");
+      setSuccess(true);
     }
     else {
       setMessage("Scale setup unsuccessful!  We were unable to find the scale online.  Please try again.");
+      setSuccess(false);
     }
   }
 
   const waitForScale = async () => {
-    setMessage("Waiting for the scale to come online. This can take up to a minute....");
+    setMessage("Waiting for the scale to come online. This can take up to two minutes....");
     let success = false;
     let i = 0;
     intervalId.current = setInterval(async () => {
-      if (i >= 60 || success) {
+      if (i >= 120 || success) {
        clearInterval(intervalId.current);
        isScaleOnline(success);
       } else {
@@ -173,7 +182,6 @@ const SetupScale = (props) => {
   const sendNetworkInfo = async () => {
     // let data = {s: selectedSSID, p: password};
     let data = 's=' + selectedSSID + '&p=' + password;
-    setMessage(data);
     setInProgress(true);
     await connectToSSID(data);
     wifiDisconnect();
@@ -234,7 +242,7 @@ const SetupScale = (props) => {
                   transform={[{rotate: '180deg'}]}
                 />
                 <Text p white marginLeft={sizes.s}>
-                  {'Cancel Setup'}
+                  {success ? 'Go Home' : 'Cancel Setup'}
                 </Text>
               </Button>
               {pickingNetwork && 
@@ -262,21 +270,25 @@ const SetupScale = (props) => {
               </Text>
               {pickingNetwork && renderConnectHelper()}
             </Block>
-              {inProgress && !pickingNetwork ? 
-                <Block align="center" alignSelf="center" width={"80%"} justify="center" marginVertical={sizes.sm}>
-                  <Progress.CircleSnail size={100} indeterminate={true} color={'white'} /> 
-                </Block>
-                :
-                <Button
-                  onPress={pickingNetwork ? sendNetworkInfo : handleSetupScale}
-                  marginVertical={sizes.s}
-                  marginHorizontal={sizes.sm}
-                  gradient={gradients.secondary}>
-                  <Text bold white transform="uppercase">
-                    {pickingNetwork ? 'Send network info' : 'Start'}
-                  </Text>
-                </Button>
-              }
+            {!success && (
+              <>
+                {inProgress && !pickingNetwork ? 
+                  <Block align="center" alignSelf="center" width={"80%"} justify="center" marginVertical={sizes.sm}>
+                    <Progress.CircleSnail size={100} indeterminate={true} color={'white'} /> 
+                  </Block>
+                  :
+                  <Button
+                    onPress={pickingNetwork ? sendNetworkInfo : handleSetupScale}
+                    marginVertical={sizes.s}
+                    marginHorizontal={sizes.sm}
+                    gradient={gradients.secondary}>
+                    <Text bold white transform="uppercase">
+                      {pickingNetwork ? 'Send network info' : 'Start'}
+                    </Text>
+                  </Button>
+                }
+              </>
+            )}
           </Block>
         </Block>
       </Block>

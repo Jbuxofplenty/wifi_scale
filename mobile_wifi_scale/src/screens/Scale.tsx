@@ -1,18 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/core';
 import { useDispatch, useSelector } from 'react-redux';
 import Slider from '@react-native-community/slider';
 
-import { Block, Button, Image, Text, Divider, Switch } from '../components/';
+import { Block, Button, Image, Text, Divider, Switch, Calibrate } from '../components/';
 import { useTheme, useTranslation } from '../hooks/';
 import { updateActiveScreen } from '../actions/data';
 import { IDevice } from '../constants/types';
 import { setUserData } from '../actions/auth';
-import { setDeviceData } from '../actions/data';
+import { setDeviceData, removeDevice, getDevices } from '../actions/data';
+import { fire, getWeight } from '../api/firebase';
+import Debug from '../constants/debug';
 
 const isAndroid = Platform.OS === 'android';
+
+let debug = "";
+if(Debug.DEBUG) {
+  debug = "/development/";
+}
 
 const Scale = (props) => {
   const navigation = useNavigation();
@@ -21,7 +28,8 @@ const Scale = (props) => {
   const dispatch = useDispatch();
   const userData = useSelector((state) => state.auth.userData);
   const prevScreen = useSelector((state) => state.data.prevScreen);
-  const deviceUserSettings = userData.devices[scale.mac.replace(/:/g, "")];
+  const macKey = scale.mac.replace(/:/g, "");
+  const deviceUserSettings = userData.devices[macKey];
   const [percentThreshold, setPercentThreshold] = useState(deviceUserSettings.percentThreshold);
   const [purchase, setPurchase] = useState(deviceUserSettings.purchase);
   const [publishFrequency, setPublishFrequency] = useState(scale.publishFrequency);
@@ -29,31 +37,41 @@ const Scale = (props) => {
   const now = new Date();
   // If no update for a day
   const online = (now - lastPublished) < 1000 * 3600 * 24; // milliseconds in second * seconds in hour * hours in day
-  console.log(now - lastPublished, 1000 * 3600 * 24)
+
+  // Setup listener for when current weight of device changes
+  useEffect(() => {
+    let currentWeightRef = fire.database().ref(debug + '/devices/' + macKey + '/currentWeight')
+    currentWeightRef.on('value', (snapshot) => {
+      console.log('hi')
+      dispatch(getDevices());
+    });
+  }, []);
 
   const handleGoBack = () => {
     if(percentThreshold !== deviceUserSettings.percentThreshold || purchase !== deviceUserSettings.purchase) {
       let newUser = {...userData};
-      newUser.devices[scale.mac.replace(/:/g, "")].percentThreshold = percentThreshold;
-      newUser.devices[scale.mac.replace(/:/g, "")].purchase = purchase;
+      newUser.devices[macKey].percentThreshold = percentThreshold;
+      newUser.devices[macKey].purchase = purchase;
       dispatch(setUserData(newUser));
     }
     if(publishFrequency !== scale.publishFrequency) {
       let newScale = {...scale};
       newScale.publishFrequency = publishFrequency;
       delete newScale.image;
-      dispatch(setDeviceData(scale.mac.replace(/:/g, ""), newScale));
+      dispatch(setDeviceData(macKey, newScale));
     }
     navigation.goBack();
     dispatch(updateActiveScreen(prevScreen));
   }
 
   const handleFactoryReset = () => {
-
+    dispatch(updateActiveScreen(prevScreen));
+    navigation.goBack();
+    dispatch(removeDevice(macKey));
   }
 
-  const handleCalibrate = () => {
-
+  const handleRefresh = () => {
+    getWeight(macKey);
   }
 
   const handleSlider = (value) => {
@@ -155,7 +173,7 @@ const Scale = (props) => {
               paddingVertical={sizes.sm}>
             <Block align="center" marginTop={10}>
               <Button
-                onPress={handleCalibrate}
+                onPress={handleRefresh}
                 width="80%"
                 marginVertical={sizes.s}
                 marginHorizontal={sizes.md}
@@ -184,28 +202,7 @@ const Scale = (props) => {
           <Divider />
 
           {/* profile: calibration */}
-          <Block row align="center" justify="center" width="80%" alignSelf="center" marginTop={sizes.md}>
-            <Text h5 semibold align="center">
-              {'Calibration'}
-            </Text>
-          </Block>
-          <Block row align="center" justify="center" alignSelf="center">
-            <Button
-              onPress={handleCalibrate}
-              width="50%"
-              marginVertical={sizes.s}
-              marginHorizontal={sizes.sm}
-              gradient={gradients.secondary}>
-              <Text bold white transform="uppercase">
-                {'Calibrate now'}
-              </Text>
-            </Button>
-          </Block>
-          <Block row align="center" alignSelf="center" width={"80%"} justify="space-between" marginVertical={sizes.sm}>
-            <Text align="center">Date Last Calibrated:</Text>
-            <Text align="center">{scale.dateLastCalibratedString === "" ? "N/A" : scale.dateLastCalibratedString}</Text>
-          </Block>
-          <Divider />
+          <Calibrate scale={scale} />
 
           {/* profile: device settings */}
           <Block row align="center" justify="center" width="80%" alignSelf="center" marginTop={sizes.md}>
@@ -239,6 +236,7 @@ const Scale = (props) => {
               minimumTrackTintColor="#0dff4b"
               maximumTrackTintColor="#000000"
               onValueChange={handleSlider}
+              step={1}
             />
           </Block>
           <Block row align="center" justify="center" width="80%" alignSelf="center" marginTop={sizes.md}>
@@ -256,6 +254,7 @@ const Scale = (props) => {
               minimumTrackTintColor="#0dff4b"
               maximumTrackTintColor="#000000"
               onValueChange={handleFrequencySlider}
+              step={1}
             />
           </Block>
           <Divider />

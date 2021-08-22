@@ -8,7 +8,8 @@ deviceAdded = functions.database.ref('/users/{uid}/devices/{deviceId}').onCreate
   const deviceId = context.params.deviceId.replace(/:/g, '');
   // const uid = context.params.uid;
   // console.log(deviceId);
-  sendCommand(deviceId, "register");
+  // Wait a few seconds to allow the device to come online
+  setTimeout(() => { sendCommand(deviceId, "register") }, 5000);
 });
 
 

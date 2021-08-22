@@ -9,9 +9,9 @@ const defaultDevice = {
   currentWeight: 0,
   dateLastCalibrated: null,
   dateLastCalibratedString: "",
-  publishFrequency: 1, // hour
+  publishFrequency: 12, // hours
   lastPublished: Date.now(),
-  name: "",
+  name: "Wifi-Scale",
   lastPublishedString: new Date().toLocaleString("en-US", {timeZone: "America/New_York"}),
 }
 
@@ -32,7 +32,7 @@ handleTopicPublish = functions.pubsub.topic('wifi-scale-topic').onPublish(
     const messageBody = message.data ? Buffer.from(message.data, 'base64').toString() : null;
     // console.log('The function was triggered at ', context.timestamp);
     // console.log('The unique ID for the event is', context.eventId);
-    // console.log(deviceId, subFolder, messageBody)
+    console.log(deviceId, subFolder, messageBody);
     if(subFolder === "register") return registerDevice(deviceId);
     if(subFolder === "getWeight") return updateWeight(deviceId, parseFloat(messageBody));
 });
@@ -45,12 +45,12 @@ async function registerDevice(deviceId) {
   return db.ref('/devices/' + deviceId).set(device);
 }
 
-async function updateWeight(deviceId, weight) {
+async function updateWeight(deviceId, currentWeight) {
   let lastPublished = Date.now();
   let lastPublishedString = new Date().toLocaleString("en-US", {timeZone: "America/New_York"});
-  await db.ref('/devices/' + deviceId + '/lastPublished').update(lastPublished);
-  await db.ref('/devices/' + deviceId + '/lastPublishedString').update(lastPublishedString);
-  return db.ref('/devices/' + deviceId + '/currentWeight').update(weight);
+  await db.ref('/devices/' + deviceId).update({ lastPublished });
+  await db.ref('/devices/' + deviceId).update({ lastPublishedString });
+  return db.ref('/devices/' + deviceId).update({ currentWeight });
 }
 
 module.exports = {

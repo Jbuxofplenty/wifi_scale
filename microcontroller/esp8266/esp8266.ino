@@ -8,6 +8,8 @@
 #include "wifi.h"
 #include "hx711.h"
 
+WiFiManager wifiManager;
+
 // The MQTT callback function for commands and configuration updates
 // Place your message handler code here.
 void messageReceived(String &topic, String &payload) {
@@ -15,6 +17,20 @@ void messageReceived(String &topic, String &payload) {
   if(payload == "register") {
     Serial.println("Registering device with MAC address: " + WiFi.macAddress());
     publishTelemetry("/register", WiFi.macAddress());
+  }
+  else if(payload == "reset") {
+    Serial.println("Reseting the device...");
+    wifiManager.resetSettings();
+    delay(2000);
+    ESP.restart();
+  }
+  else if(payload == "getWeight") {
+    Serial.println("Getting the weight...");
+    // String weight = getWeight();
+    int random_number = rand() % 100 + 1;
+    String weight = String(random_number);
+    Serial.println("Weight: " + weight)
+    publishTelemetry("/getWeight", weight);
   }
 }
 
@@ -27,7 +43,6 @@ void setup() {
 
   // Wifi manager setup
   Serial.println("Starting WifiManager with SSID=WifiScale");
-  WiFiManager wifiManager;
   wifiManager.resetSettings();
   wifiManager.autoConnect("WifiScale");
   delay(1000);

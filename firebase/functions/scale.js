@@ -1,7 +1,6 @@
 // Common packages
 const express = require('express');
 const cors = require('cors');
-const bodyParser = require('body-parser');
 const { db } = require('./admin');
 const { sendCommand } = require('./iot');
 
@@ -15,8 +14,8 @@ const { sendCommand } = require('./iot');
 var deleteDevice = express();
 
 // For production
-deleteDevice.use(bodyParser.json()) // for parsing application/json
-deleteDevice.use(bodyParser.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
+deleteDevice.use(express.json()) // for parsing application/json
+deleteDevice.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
 
 // Automatically allow cross-origin requests
 deleteDevice.use(cors({ origin: true }));
@@ -24,6 +23,7 @@ deleteDevice.use(cors({ origin: true }));
 deleteDevice.post('*', async (req, res) => {
   const macAddress = req.body.macAddress;
   const uid = req.body.uid;
+  console.log(macAddress, uid)
   await sendCommand(macAddress, "reset");
   await db.ref('/devices/' + macAddress).remove();
   await db.ref('/users/' + uid + '/devices/' + macAddress).remove();
@@ -39,8 +39,8 @@ deleteDevice.post('*', async (req, res) => {
 var getCurrentWeight = express();
 
 // For production
-getCurrentWeight.use(bodyParser.json()) // for parsing application/json
-getCurrentWeight.use(bodyParser.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
+getCurrentWeight.use(express.json()) // for parsing application/json
+getCurrentWeight.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
 
 // Automatically allow cross-origin requests
 getCurrentWeight.use(cors({ origin: true }));

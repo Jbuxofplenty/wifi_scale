@@ -65,7 +65,7 @@ void tareScale() {
 						// by the SCALE parameter set with set_scale
 }
 
-String publishWeight() {
+String getWeight() {
   scale.power_up();
   delay(1000);
   String payload;
@@ -77,9 +77,11 @@ String publishWeight() {
     Serial.print("\t| average:\t");
     Serial.println(weightGrams, 1);
 
-    payload = String("{\"timestamp\":") + time(nullptr) +
-                      String(",\"weight in grams\":") + weightGrams +
-                      String("}");
+    // payload = String("{\"timestamp\":") + time(nullptr) +
+    //                   String(",\"weight in grams\":") + weightGrams +
+    //                   String("}");
+
+    payload = String(weightGrams);
 
     scale.power_down();              // put the ADC in sleep mode
   } else {

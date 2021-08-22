@@ -7,12 +7,13 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import Text from './Text';
 import Block from './Block';
 import { useTheme } from '../hooks/';
+import { IDevice } from '../constants/types';
 
 const SubscriptionSettings = () => {
   const {sizes} = useTheme();
-  const { userData } = useSelector((state) => state.auth);
-  const [percentThreshold, setPercentThreshold] = useState(10);
-  const devices = [{value: 'Kitchen Scale', label:'Kitchen Scale'}];
+  const allDevices = useSelector<IDevice[]>((state) => state.data && state.data.devices ? state.data.devices : []);
+  const [percentThreshold, setPercentThreshold] = useState(20);
+  const devices = allDevices.map(device => { return {value: device.name, label: device.name}});
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const [device, setDevice] = useState(null);

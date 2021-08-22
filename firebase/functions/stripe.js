@@ -3,7 +3,6 @@ const functions = require('firebase-functions');
 const stripe = require('stripe')(functions.config().stripe.token);
 const express = require('express');
 const cors = require('cors');
-const bodyParser = require('body-parser');
 
 /**
  * Create a source (payment type) for a given user
@@ -17,8 +16,8 @@ const bodyParser = require('body-parser');
 var createSource = express();
 
 // For production
-createSource.use(bodyParser.json()) // for parsing application/json
-createSource.use(bodyParser.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
+createSource.use(express.json()) // for parsing application/json
+createSource.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
 
 // Automatically allow cross-origin requests
 createSource.use(cors({ origin: true }));
@@ -51,8 +50,8 @@ createSource.post('*', async (req, res) => {
 var createStripeUser = express();
 
 // For production
-createStripeUser.use(bodyParser.json()) // for parsing application/json
-createStripeUser.use(bodyParser.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
+createStripeUser.use(express.json()) // for parsing application/json
+createStripeUser.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
 
 // Automatically allow cross-origin requests
 createStripeUser.use(cors({ origin: true }));
@@ -76,8 +75,8 @@ createStripeUser.post('*', async (req, res) => {
 var retrieveCard = express();
 
 // For production
-retrieveCard.use(bodyParser.json()) // for parsing application/json
-retrieveCard.use(bodyParser.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
+retrieveCard.use(express.json()) // for parsing application/json
+retrieveCard.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
 
 // Automatically allow cross-origin requests
 retrieveCard.use(cors({ origin: true }));
@@ -114,8 +113,8 @@ retrieveCard.post('*', async (req, res) => {
 var generateTransaction = express();
 
 // For production
-generateTransaction.use(bodyParser.json()) // for parsing application/json
-generateTransaction.use(bodyParser.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
+generateTransaction.use(express.json()) // for parsing application/json
+generateTransaction.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
 
 // Automatically allow cross-origin requests
 generateTransaction.use(cors({ origin: true }));

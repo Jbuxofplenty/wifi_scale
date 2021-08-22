@@ -27,11 +27,13 @@ const Home = () => {
 
   useEffect(() => {
     let newDevices = [...allDevices];
-    for(let i = 0; i < newDevices.length; i++) {
-      newDevices[i].image = cardImages[i];
+    if(newDevices.length !== devices.length - 1) {
+      for(let i = 0; i < newDevices.length; i++) {
+        newDevices[i].image = cardImages[i];
+      }
+      newDevices.push({addDevice: true});
+      setDevices(newDevices);
     }
-    newDevices.push({addDevice: true});
-    setDevices(newDevices);
   }, [allDevices]);
 
   useEffect(() => {

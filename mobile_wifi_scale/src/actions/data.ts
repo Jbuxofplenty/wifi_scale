@@ -10,7 +10,12 @@ import {
   retrieveProducts,
   retrieveDevices,
   updateDevice,
+  deleteDevice,
 } from '../api/firebase';
+
+import {
+  getUserData,
+} from './auth';
 
 export const updatePrevScreen = (prevScreen) => ({
   type: DATA_PREV_SCREEN_UPDATE,
@@ -54,6 +59,9 @@ export const getDevices = () => (dispatch, getState) => {
     });
   }
   else {
+    if(store.data.devices && store.data.devices.length !== 0) {
+      dispatch(setDevices([]));
+    }
     console.log('No devices, not fetching');
   }
 }
@@ -61,6 +69,15 @@ export const getDevices = () => (dispatch, getState) => {
 export const setDeviceData = (deviceId, device) => (dispatch) => {
   updateDevice(deviceId, device).then(async () => {
     await dispatch(getDevices());
+  }).catch((err) => {
+    console.log(err)
+  });
+}
+
+export const removeDevice = (deviceId) => (dispatch) => {
+  deleteDevice(deviceId).then(async () => {
+    await dispatch(getDevices());
+    await dispatch(getUserData());
   }).catch((err) => {
     console.log(err)
   });

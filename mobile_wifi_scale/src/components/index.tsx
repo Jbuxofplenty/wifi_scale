@@ -14,6 +14,7 @@ import Divider from './Divider';
 import CreditCard from './CreditCard';
 import SubscriptionSettings from './SubscriptionSettings';
 import PaymentInfo from './PaymentInfo';
+import Calibrate from './Calibrate';
 
 export {
   Block,
@@ -32,4 +33,5 @@ export {
   CreditCard,
   SubscriptionSettings,
   PaymentInfo,
+  Calibrate,
 };

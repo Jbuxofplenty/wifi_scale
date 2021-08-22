@@ -1,5 +1,5 @@
 import firebase from 'firebase/app';
-import { Platform } from 'react-native';
+import axios from 'axios';
 
 // Optionally import the services that you want to use
 import "firebase/auth";
@@ -17,7 +17,7 @@ if(Debug.DEBUG) {
   debug = "/development/";
 }
 
-let baseUrl = "";
+let baseUrl = "https://us-central1-wifi-scale-9b7b1.cloudfunctions.net/v1";
 
 const emptyAddress = {
   "address1": "",
@@ -72,19 +72,36 @@ export async function checkScaleOnline(macAddress) {
 }
 
 export async function deleteDevice(macAddress) {
-  let url = baseUrl + '/resetDevice';
-  await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      macAddress
-    })
+  var uid = firebase.auth().currentUser.uid;
+  let url = baseUrl + '/scale/deleteDevice';
+  let data = { macAddress, uid };
+  console.log(url)
+  await axios({
+    method: 'post',
+    url,
+    data,
+    responseType: 'text'
   })
-  .then((response) => response.json())
-  .then((responseJson) => {
-    console.log(responseJson)
+  .then(function (response) {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error);
+  });
+}
+
+export async function getWeight(macAddress) {
+  let url = baseUrl + '/scale/getCurrentWeight';
+  console.log(url, macAddress)
+  let data = { macAddress };
+  await axios({
+    method: 'post',
+    url,
+    data,
+    responseType: 'text'
+  })
+  .then(function (response) {
+    console.log(response.data);
   })
   .catch((error) => {
     console.error(error);
