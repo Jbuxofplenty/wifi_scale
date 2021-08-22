@@ -15,7 +15,7 @@ export default () => {
       <Stack.Screen
         name="Home"
         component={Home}
-        options={{title: 'Wifi Scale'}}
+        options={{title: 'Home'}}
       />
       
       <Stack.Screen

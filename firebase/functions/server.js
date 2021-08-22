@@ -11,22 +11,43 @@ const {
 ///////////////////////////////////////////////////////////////////
 
 const { 
-  submitIssue,
-  whileYouWereAway,
+  createStripeUser,
+  createSource,
+  retrieveCard,
+  generateTransaction,
 } = require('./stripe');
 
 // Create an Express object and routes (in order)
-const github = express();
-github.use('/submitIssue', submitIssue);
-github.use('/whileYouWereAway', whileYouWereAway);
-github.use(getDefault);
+const stripe = express();
+stripe.use('/createStripeUser', createStripeUser);
+stripe.use('/createSource', createSource);
+stripe.use('/createStripeUser', retrieveCard);
+stripe.use('/createSource', generateTransaction);
+stripe.use(getDefault);
+
+///////////////////////////////////////////////////////////////////
+//////////////////////        SCALE          //////////////////////
+///////////////////////////////////////////////////////////////////
+
+const { 
+  deleteDevice,
+  getCurrentWeight,
+} = require('./scale');
+
+// Create an Express object and routes (in order)
+const scale = express();
+scale.use('/deleteDevice', deleteDevice);
+scale.use('/getCurrentWeight', getCurrentWeight);
+scale.use(getDefault);
 
 
 ///////////////////////////////////////////////////////////////////
 //////////////////////        VERSION          ////////////////////
 ///////////////////////////////////////////////////////////////////
+
 const v1 = express();
 v1.use('/stripe', stripe);
+v1.use('/scale', scale);
 v1.use(getDefault);
 
 

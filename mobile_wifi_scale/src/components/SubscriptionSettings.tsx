@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { StyleSheet } from "react-native";
-import { Ionicons } from '@expo/vector-icons';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import Slider from '@react-native-community/slider';
 import DropDownPicker from 'react-native-dropdown-picker';
 
 import Text from './Text';
 import Block from './Block';
 import { useTheme } from '../hooks/';
-import { setUserData } from '../actions/auth';
 
 const SubscriptionSettings = () => {
   const {sizes} = useTheme();
@@ -47,7 +45,7 @@ const SubscriptionSettings = () => {
           <Block row justify='center' alignSelf='center' width="70%" marginTop={sizes.md}>
             <Slider
               style={styles.slider}
-              minimumValue={1}
+              minimumValue={10}
               maximumValue={50}
               value={percentThreshold}
               minimumTrackTintColor="#0dff4b"

@@ -31,19 +31,21 @@ export interface IDeviceOptions {
   image?: string;
 }
 export interface IDevice {
-  id?: number;
-  title?: string;
-  description?: string;
-  category?: ICategory;
-  image?: string;
-  location?: ILocation;
-  rating?: number;
-  user?: IUser;
-  offers?: IProduct[];
-  options?: IDeviceOptions[];
-  timestamp?: number;
+  currentWeight?: number;
+  image?: Buffer;
+  mac?: string;
+  name?: string;
+  dateAddedString?: string;
+  dateAdded?: number;
+  dateLastCalibrated?: number;
+  dateLastCalibratedString?: string;
+  lastPublished?: number;
+  lastPublishedString?: string;
+  publishFrequency?: number;
   onPress?: (event?: any) => void;
+  currentlySubscribed?: boolean;
   addDevice?: boolean;
+  subscribedItem?: Object;
 }
 
 export interface IProduct {

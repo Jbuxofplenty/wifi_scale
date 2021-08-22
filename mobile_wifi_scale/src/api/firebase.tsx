@@ -1,4 +1,5 @@
 import firebase from 'firebase/app';
+import { Platform } from 'react-native';
 
 // Optionally import the services that you want to use
 import "firebase/auth";
@@ -8,7 +9,6 @@ import "firebase/database";
 //import "firebase/storage";
 import * as GoogleAuthentication from 'expo-google-app-auth';
 
-import {Alert} from "react-native";
 import Debug from '../constants/debug';
 import apiKeys from '../config/keys';
 
@@ -16,6 +16,8 @@ let debug = "";
 if(Debug.DEBUG) {
   debug = "/development/";
 }
+
+let baseUrl = "";
 
 const emptyAddress = {
   "address1": "",
@@ -57,6 +59,46 @@ export async function googleSignIn() {
   });
 }
 
+export async function checkScaleOnline(macAddress) {
+  var snapshot = await firebase.database().ref(debug + '/devices/' + macAddress).once('value')
+    .catch(function(error) {
+      console.log(error.message);
+      Promise.reject();
+    });
+  if (snapshot.exists()) {
+    return true;
+  }
+  return false; 
+}
+
+export async function deleteDevice(macAddress) {
+  let url = baseUrl + '/resetDevice';
+  await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      macAddress
+    })
+  })
+  .then((response) => response.json())
+  .then((responseJson) => {
+    console.log(responseJson)
+  })
+  .catch((error) => {
+    console.error(error);
+  });
+}
+
+export async function updateDevice(deviceId, device) {
+  // Set the user data
+  return firebase.database().ref(debug + '/devices/' + deviceId).update(device).catch(function(error) {
+    console.log(error.message);
+    Promise.reject();
+  });
+}
+
 export async function updateUser(user) {
   var userId = firebase.auth().currentUser.uid;
   // Set the user data
@@ -91,6 +133,24 @@ export async function retrieveProducts() {
     return snapshot.val().filter(x => x !== undefined);;
   }
   return false; 
+}
+
+export async function retrieveDevices(deviceIds) {
+  let promises = deviceIds.map(deviceId => {
+    return firebase.database().ref(debug + '/devices/' + deviceId).once('value')
+    .catch(function(error) {
+      console.log(error.message);
+      Promise.reject();
+    });
+  });
+  let snapshots = await Promise.all(promises);
+  let devices = snapshots.map(snapshot => {
+    if (snapshot.exists()) {
+      return snapshot.val();
+    }
+    return undefined;
+  });
+  return devices.filter(x => x !== undefined); 
 }
 
 export async function registerUser(username, email, password) {

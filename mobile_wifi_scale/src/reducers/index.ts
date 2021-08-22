@@ -14,10 +14,10 @@ const reducers = combineReducers({
   data: dataReducer,
 });
 
-const middleware = [ReduxThunk];
+// const middleware = [ReduxThunk];
 
 // For debugging purposes
-// const middleware = [ReduxThunk, logger];
+const middleware = [ReduxThunk, logger];
 
 const store = createStore(
   reducers,

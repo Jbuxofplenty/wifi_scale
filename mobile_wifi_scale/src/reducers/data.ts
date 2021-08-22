@@ -3,12 +3,14 @@ import {
   DATA_PREV_SCREEN_UPDATE,
   DATA_ACTIVE_SCREEN_UPDATE,
   DATA_UPDATE_PRODUCTS,
+  DATA_UPDATE_DEVICES,
 } from '../constants/data';
 
 const INITIAL_STATE = {
   prevScreen: 'Home',
   activeScreen: 'Home',
   products: [],
+  devices: [],
 };
 
 export default function (state = INITIAL_STATE, action) {
@@ -40,6 +42,13 @@ export default function (state = INITIAL_STATE, action) {
       };
     }
 
+    case DATA_UPDATE_DEVICES: {
+      return {
+        ...state,
+        devices: action.payload,
+      };
+    }
+    
     default:
       return state;
   }

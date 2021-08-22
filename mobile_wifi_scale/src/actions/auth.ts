@@ -17,6 +17,10 @@ import {
   updateUser,
 } from '../api/firebase';
 
+import {
+  reset,
+} from './data';
+
 const defaultUserData = {
   name: "",
   email: "",
@@ -116,6 +120,7 @@ export const logout = () => async (dispatch) => {
   dispatch(loggingOut(true));
   await signOut().then(async (res) => {
     dispatch(loggedOut());
+    dispatch(reset());
   }).catch((err) => {
     dispatch(errorLogOut('Error logging out.'));
   }).finally(() => {

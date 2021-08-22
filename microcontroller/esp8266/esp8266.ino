@@ -12,6 +12,10 @@
 // Place your message handler code here.
 void messageReceived(String &topic, String &payload) {
   Serial.println("incoming: " + topic + " - " + payload);
+  if(payload == "register") {
+    Serial.println("Registering device with MAC address: " + WiFi.macAddress());
+    publishTelemetry("/register", WiFi.macAddress());
+  }
 }
 
 void setup() {  

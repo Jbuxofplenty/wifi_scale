@@ -18,7 +18,7 @@
 const char* project_id = "wifi-scale-9b7b1";
 const char* location = "us-central1";
 const char* registry_id = "wifi-scale-registry";
-const char* device_id = "esp8266";
+String mac_address = WiFi.macAddress();
 
 // Configuration for NTP
 const char* ntp_primary = "time.google.com";

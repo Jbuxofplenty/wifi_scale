@@ -36,7 +36,7 @@ export async function retrieveScaleMAC() {
       mac = element.nextSibling.text;
     }
   })
-  return mac;
+  return mac.replace(/:/g, "");
 }
 
 export async function connectToSSID(data) {

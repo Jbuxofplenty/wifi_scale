@@ -141,8 +141,9 @@ void connect() {
 
 void setupCloudIoT() {
   // Create the device
+  mac_address.replace(":", "");
   device = new CloudIoTCoreDevice(
-      project_id, location, registry_id, device_id);
+      project_id, location, registry_id, mac_address.c_str());
 
   // ESP8266 WiFi setup
   netClient = new WiFiClientSecure();

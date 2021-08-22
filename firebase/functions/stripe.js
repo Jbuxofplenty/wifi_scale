@@ -1,3 +1,5 @@
+// Common packages
+const functions = require('firebase-functions');
 const stripe = require('stripe')(functions.config().stripe.token);
 const express = require('express');
 const cors = require('cors');
@@ -142,3 +144,10 @@ generateTransaction.post('*', async (req, res) => {
     }
   );
 });
+
+module.exports = {
+  createStripeUser,
+  createSource,
+  retrieveCard,
+  generateTransaction,
+};

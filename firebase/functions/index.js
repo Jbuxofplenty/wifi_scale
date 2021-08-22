@@ -13,27 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 'use strict';
- const functions = require('firebase-functions');
+'use strict';
+const functions = require('firebase-functions');
+
+// Express Servers
+const {
+  v1,
+} = require('./server');
  
- // Express Servers
- const {
-   v1,
- } = require('./server');
+// API
+exports.v1 = functions.https.onRequest(v1);
  
- // API
- exports.v1 = functions.https.onRequest(v1);
- 
- // Functions requiring firebase context
-//  exports.getVirgilJwt = getVirgilJwt;
- 
- // Scheduled functions
- // exports.retrieveCryptoData = retrieveCryptoData;
- 
- // Firebase triggers
- // const {
- //   sendGoodbyeEmail,
- //   sendWelcomeEmail,
- // } = require('./triggers');
- // exports.sendWelcomeEmail = sendWelcomeEmail;
- // exports.sendGoodbyeEmail = sendGoodbyeEmail;
+// Firebase IoT Bridge
+const {
+  handleTopicPublish,
+} = require('./pubsub');
+
+exports.handleTopicPublish = handleTopicPublish;
+
+// Triggers
+const {
+  deviceAdded,
+} = require('./triggers');
+
+exports.deviceAdded = deviceAdded;

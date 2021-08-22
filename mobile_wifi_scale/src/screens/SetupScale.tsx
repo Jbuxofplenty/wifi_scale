@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/core';
 import { useDispatch, useSelector } from 'react-redux';
@@ -13,6 +12,7 @@ import { useTheme } from '../hooks/';
 import { updateActiveScreen } from '../actions/data';
 import { retrieveSSIDs, retrieveScaleMAC, connectToSSID } from '../api/scale';
 import { setUserData } from '../actions/auth';
+import { checkScaleOnline } from '../api/firebase';
 
 const welcomeMessage = 'We will attempt to hook up your scale ' +
 'to your home network.  We will first connect to the scale with this phone and upon a successful ' +
@@ -22,6 +22,7 @@ const welcomeMessage = 'We will attempt to hook up your scale ' +
 const defaultDevice = {
   currentlySubscribed: false,
   percentThreshold: 10,
+  purchase: true,
 }
 
 const SetupScale = (props) => {
@@ -42,10 +43,7 @@ const SetupScale = (props) => {
   const { userData } = useSelector((state) => state.auth);
   let intervalId = useRef(null)
 
-  const [items, setItems] = useState([
-    {label: 'SkyNet  25%', value: 'SkyNet'},
-    {label: 'Testnet  50%', value: 'TestNet'}
-  ]);
+  const [items, setItems] = useState();
 
   const handleSetupScale = () => {
     setShowWelcome(false);
@@ -117,20 +115,16 @@ const SetupScale = (props) => {
     }
   }
 
-  const checkScaleOnline = async () => {
-    return false;
-  }
-
   const waitForScale = async () => {
-    setMessage("Waiting for the scale to come online!");
+    setMessage("Waiting for the scale to come online. This can take up to a minute....");
     let success = false;
     let i = 0;
     intervalId.current = setInterval(async () => {
-      if (i >= 10 || success) {
+      if (i >= 60 || success) {
        clearInterval(intervalId.current);
        isScaleOnline(success);
       } else {
-        success = await checkScaleOnline();
+        success = await checkScaleOnline(mac);
         i++;
       }
      }, 1000);
@@ -187,7 +181,7 @@ const SetupScale = (props) => {
     setPickingNetwork(false);
 
     // Wait for the connection to be established before making http requests
-    setTimeout(() => { updateScaleOwner() }, 10000);
+    setTimeout(() => { updateScaleOwner() }, 15000);
   }
   
   const renderConnectHelper = () => (

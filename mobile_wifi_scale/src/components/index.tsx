@@ -6,7 +6,7 @@ import Modal from './Modal';
 import Switch from './Switch';
 import Checkbox from './Checkbox';
 import Image from './Image';
-import Article from './Article';
+import Device from './Device';
 import Product from './Product';
 import AddDevice from './AddDevice';
 import AddressCard from './AddressCard';
@@ -23,7 +23,7 @@ export {
   Switch,
   Checkbox,
   Image,
-  Article,
+  Device,
   Product,
   Modal,
   AddDevice,

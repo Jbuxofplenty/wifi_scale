@@ -16,6 +16,8 @@ const Profile = () => {
   const {assets, colors, sizes} = useTheme();
   const dispatch = useDispatch();
   const {displayName, email, photoURL} = useSelector((state) => state.auth.user);
+  const numDevices = useSelector((state) => state.auth.userData && state.auth.userData.devices ? Object.keys(state.auth.userData.devices).length : 0);
+  const numSubscriptions = 0;
   const prevScreen = useSelector((state) => state.data.prevScreen);
 
   const handleAmazonLink = () => {
@@ -151,12 +153,12 @@ const Profile = () => {
               paddingVertical={sizes.sm}
               renderToHardwareTextureAndroid>
               <Block align="center">
-                <Text h5>0</Text>
-                <Text>Devices</Text>
+                <Text h5>{numDevices}</Text>
+                <Text>{numDevices === 1 ? 'Device' : 'Devices'}</Text>
               </Block>
               <Block align="center">
-                <Text h5>0</Text>
-                <Text>{'Subscriptions'}</Text>
+                <Text h5>{numSubscriptions}</Text>
+                <Text>{numSubscriptions === 1 ? 'Subscription' :'Subscriptions'}</Text>
               </Block>
             </Block>
           </Block>
