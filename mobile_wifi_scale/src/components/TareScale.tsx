@@ -5,13 +5,12 @@ import * as Progress from 'react-native-progress';
 import { Block, Button, Image, Text, Divider, SettingsSlider } from '../components/';
 import { useTheme, useInterval } from '../hooks/';
 import { IDevice } from '../constants/types';
-import { calibrate } from '../api/firebase';
+import { tareScale } from '../api/firebase';
 
-const Calibrate = (props) => {
+const TareScale = (props) => {
   const scale:IDevice = props.scale;
   const { sizes, gradients } = useTheme();
   const [inProgress, setInProgress] = useState(false);
-  const [calibrationWeight, setCalibrationWeight] = useState(100);
   const [progress, setProgress] = useState(0);
   const [totalTime, setTotalTime] = useState(0);
   const [message, setMessage] = useState("");
@@ -44,21 +43,15 @@ const Calibrate = (props) => {
     })
   }
 
-  const handleCalibrate = async () => {
-    calibrate(scale.mac, calibrationWeight);
-    await executeInterval("Remove all items from the scale so the scale can be tared...", 10);
+  const handleTareScale = async () => {
+    tareScale(scale.mac);
+    await executeInterval("Place your container on the scale so the device can be tared...", 10);
     await executeInterval("Getting the scale reading...", 5);
-    await executeInterval("Place " + calibrationWeight.toFixed(0).toString() + " grams on the scale so it can be calibrated...", 15);
-    await executeInterval("Getting the scale reading...", 5);
-    setMessage("Scale calibrated successfully!");
+    setMessage("Scale tared successfully!");
     setTimeout(() => { setMessage(""); }, 3000);
   }
 
-  const handleSlider = (value) => {
-    setCalibrationWeight(value);
-  }
-
-  const renderCalibrationSteps = () => (
+  const renderTareSteps = () => (
     <>
       <Block align="center" justify="center" alignSelf="center">
         <Block align="center" alignSelf="center" width={"80%"} justify="center" marginVertical={sizes.sm}>
@@ -75,42 +68,29 @@ const Calibrate = (props) => {
     <>
       <Block row align="center" justify="center" width="80%" alignSelf="center" marginTop={sizes.md}>
         <Text h5 semibold align="center">
-          {'Calibration'}
+          {'Tare Scale'}
         </Text>
       </Block>
       <Block row align="center" justify="center" alignSelf="center" marginVertical={sizes.md}>
         {inProgress || message !== "" ?
-          renderCalibrationSteps() :
+          renderTareSteps() :
           <Block justify='center' align="center" alignSelf='center' width="70%">
-            <SettingsSlider 
-              label={"Calibration Weight"} 
-              units={"grams"} 
-              decimals={0} 
-              onChange={handleSlider} 
-              initValue={100}
-              min={10}
-              max={300}
-            />
             <Button
-              onPress={handleCalibrate}
+              onPress={handleTareScale}
               width="50%"
               marginVertical={sizes.s}
               marginHorizontal={sizes.sm}
-              gradient={gradients.secondary}>
+              gradient={gradients.info}>
               <Text bold white transform="uppercase">
-                {'Calibrate now'}
+                {'Tare now'}
               </Text>
             </Button>
           </Block>
         }
-      </Block>
-      <Block row align="center" alignSelf="center" width={"80%"} justify="space-between" marginVertical={sizes.sm}>
-        <Text align="center">Date Last Calibrated:</Text>
-        <Text align="center">{scale.dateLastCalibratedString === "" ? "N/A" : scale.dateLastCalibratedString}</Text>
       </Block>
       <Divider />
     </>
   );
 };
 
-export default Calibrate;
+export default TareScale;

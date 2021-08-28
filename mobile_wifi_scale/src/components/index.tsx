@@ -15,6 +15,9 @@ import CreditCard from './CreditCard';
 import SubscriptionSettings from './SubscriptionSettings';
 import PaymentInfo from './PaymentInfo';
 import Calibrate from './Calibrate';
+import SettingsSlider from './SettingsSlider';
+import DeviceSettings from './DeviceSettings';
+import TareScale from './TareScale';
 
 export {
   Block,
@@ -34,4 +37,7 @@ export {
   SubscriptionSettings,
   PaymentInfo,
   Calibrate,
+  SettingsSlider,
+  DeviceSettings,
+  TareScale,
 };

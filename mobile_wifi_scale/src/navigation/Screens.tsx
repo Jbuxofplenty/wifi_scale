@@ -6,17 +6,18 @@ import { useScreenOptions } from '../hooks';
 
 const Stack = createStackNavigator();
 
-export default () => {
+export default ({ isLoggedIn }) => {
   const screenOptions = useScreenOptions();
-
   return (
     <Stack.Navigator screenOptions={screenOptions.stack}>
 
-      <Stack.Screen
-        name="Home"
-        component={Home}
-        options={{title: 'Home'}}
-      />
+      {isLoggedIn &&
+        <Stack.Screen
+          name="Home"
+          component={Home}
+          options={{title: 'Home'}}
+        />
+      }
       
       <Stack.Screen
         name="Products"

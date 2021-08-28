@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/core';
 import { useDispatch, useSelector } from 'react-redux';
-import {LinearGradient} from 'expo-linear-gradient';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Progress from 'react-native-progress';
 import WifiManager from "react-native-wifi-reborn";
 import DropDownPicker from 'react-native-dropdown-picker';

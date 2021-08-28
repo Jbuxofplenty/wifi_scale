@@ -6,3 +6,4 @@ export {
   TranslationProvider,
   useTranslation,
 } from './useTranslation';
+export useInterval from './useInterval';

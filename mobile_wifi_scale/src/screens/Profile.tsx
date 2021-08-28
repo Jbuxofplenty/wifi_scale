@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Block, Button, Image, Text, AddressCard, Divider, CreditCard } from '../components/';
 import { useTheme, useTranslation } from '../hooks/';
 import { logout } from '../actions/auth';
-import { updateActiveScreen } from '../actions/data';
+import { updateActiveScreen, updatePrevScreen } from '../actions/data';
 
 const isAndroid = Platform.OS === 'android';
 
@@ -31,8 +31,9 @@ const Profile = () => {
 
   const signOff = () => {
     dispatch(logout());
-    navigation.navigate('Home');
-    dispatch(updateActiveScreen('Home'));
+    dispatch(updateActiveScreen('Products'));
+    dispatch(updatePrevScreen('Products'));
+    navigation.navigate('Products');
   }
 
   const handleGoBack = () => {

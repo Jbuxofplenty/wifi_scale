@@ -1,40 +1,57 @@
 import React, {useEffect, useState} from 'react';
 import {FlatList} from 'react-native';
 import { useNavigation } from '@react-navigation/core';
+import { useIsFocused } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { useTheme } from '../hooks';
 import { IDevice } from '../constants/types';
 import {Block, Button, Device, AddDevice} from '../components';
-import { updatePrevScreen, updateActiveScreen, getDevices } from '../actions/data';
+import { updatePrevScreen, updateActiveScreen, getDevices, updateActiveDeviceIndex } from '../actions/data';
 
 
-const Home = () => {
+const Home = (props) => {
   const [ devices, setDevices ] = useState<IDevice[]>([]);
   const { sizes, assets } = useTheme();
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const isLoggedIn = useSelector((state) => state.auth.userData ? true : false);
+  const activeDeviceIndex = useSelector((state) => state.data.activeDeviceIndex);
   const userDeviceData = useSelector((state) => isLoggedIn && state.auth.userData.devices ? state.auth.userData.devices : []);
-  const allDevices = useSelector<IDevice[]>((state) => state.data && state.data.devices ? state.data.devices : []);
+  const allDevices = useSelector<IDevice[]>((state) => state.data ? state.data.devices : []);
   const cardImages = [assets.card1, assets.card2, assets.card3, assets.card4];
+  const isFocused = useIsFocused();
 
-  const navigateScale = (item) => {
+  const navigateScale = (item, index) => {
     dispatch(updatePrevScreen('Home'));
     dispatch(updateActiveScreen('Scale'));
+    dispatch(updateActiveDeviceIndex(index));
     navigation.navigate('Scale', {...item});
   }
 
   useEffect(() => {
     let newDevices = [...allDevices];
     if(newDevices.length !== devices.length - 1) {
-      for(let i = 0; i < newDevices.length; i++) {
-        newDevices[i].image = cardImages[i];
-      }
-      newDevices.push({addDevice: true});
-      setDevices(newDevices);
+      updateDevices();
     }
   }, [allDevices]);
+
+  const updateDevices = () => {
+    let newDevices = [...allDevices];
+    for(let i = 0; i < newDevices.length; i++) {
+      newDevices[i].image = cardImages[i];
+    }
+    newDevices.push({addDevice: true});
+    setDevices(newDevices);
+  }
+
+  useEffect(() => {
+    // Call only when screen open or when back on screen 
+    if(isFocused){
+      setDevices([]);
+      dispatch(getDevices());
+    }
+  }, [props, isFocused]);
 
   useEffect(() => {
     dispatch(getDevices());
@@ -60,7 +77,7 @@ const Home = () => {
         keyExtractor={(item) => `${item?.mac}`}
         style={{paddingHorizontal: sizes.padding}}
         contentContainerStyle={{paddingBottom: sizes.l}}
-        renderItem={({item}) => item.addDevice ? <AddDevice {...item} onPress={navigate} /> : <Device {...item} onPress={() => navigateScale({...item})} />}
+        renderItem={({item, index}) => item.addDevice ? <AddDevice {...item} onPress={navigate} /> : <Device {...item} onPress={() => navigateScale({...item}, index)} />}
       />
     </Block>
   );

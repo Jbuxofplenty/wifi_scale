@@ -34,7 +34,8 @@ handleTopicPublish = functions.pubsub.topic('wifi-scale-topic').onPublish(
     // console.log('The unique ID for the event is', context.eventId);
     console.log(deviceId, subFolder, messageBody);
     if(subFolder === "register") return registerDevice(deviceId);
-    if(subFolder === "getWeight") return updateWeight(deviceId, parseFloat(messageBody));
+    else if(subFolder === "getWeight") return updateWeight(deviceId, parseFloat(messageBody));
+    else if(subFolder === "calibrated") return calibrated(deviceId);
 });
 
 async function registerDevice(deviceId) {
@@ -48,9 +49,18 @@ async function registerDevice(deviceId) {
 async function updateWeight(deviceId, currentWeight) {
   let lastPublished = Date.now();
   let lastPublishedString = new Date().toLocaleString("en-US", {timeZone: "America/New_York"});
+  if(currentWeight < 0) currentWeight = 0;
   await db.ref('/devices/' + deviceId).update({ lastPublished });
   await db.ref('/devices/' + deviceId).update({ lastPublishedString });
   return db.ref('/devices/' + deviceId).update({ currentWeight });
+}
+
+async function calibrated(deviceId) {
+  let dateLastCalibrated = Date.now();
+  let dateLastCalibratedString = new Date().toLocaleString("en-US", {timeZone: "America/New_York"});
+  console.log(dateLastCalibratedString)
+  await db.ref('/devices/' + deviceId).update({ dateLastCalibrated });
+  return db.ref('/devices/' + deviceId).update({ dateLastCalibratedString });
 }
 
 module.exports = {

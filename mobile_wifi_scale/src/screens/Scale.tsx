@@ -1,53 +1,59 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/core';
 import { useDispatch, useSelector } from 'react-redux';
-import Slider from '@react-native-community/slider';
 
-import { Block, Button, Image, Text, Divider, Switch, Calibrate } from '../components/';
-import { useTheme, useTranslation } from '../hooks/';
+import { Block, Button, Image, Text, Divider, Calibrate, DeviceSettings, TareScale } from '../components/';
+import { useTheme } from '../hooks/';
 import { updateActiveScreen } from '../actions/data';
 import { IDevice } from '../constants/types';
 import { setUserData } from '../actions/auth';
-import { setDeviceData, removeDevice, getDevices } from '../actions/data';
-import { fire, getWeight } from '../api/firebase';
-import Debug from '../constants/debug';
+import { setDeviceData, removeDevice, getDevices, updateActiveDeviceIndex } from '../actions/data';
+import { fire, getWeight, updatePublishFrequency } from '../api/firebase';
+import { DEBUG } from '../constants/debug';
 
 const isAndroid = Platform.OS === 'android';
 
 let debug = "";
-if(Debug.DEBUG) {
+if(DEBUG) {
   debug = "/development/";
 }
 
 const Scale = (props) => {
   const navigation = useNavigation();
-  const scale:IDevice = props.route.params;
   const {assets, colors, sizes, gradients} = useTheme();
   const dispatch = useDispatch();
   const userData = useSelector((state) => state.auth.userData);
+  const allDevices = useSelector((state) => state.data.devices);
+  const activeDeviceIndex = useSelector((state) => state.data.activeDeviceIndex);
   const prevScreen = useSelector((state) => state.data.prevScreen);
-  const macKey = scale.mac.replace(/:/g, "");
+  const [scale, setScale] = useState<IDevice>(props.route.params);
+  const image = props.route.params.image;
+  const macKey = scale.mac;
+  const macString = scale.mac ? scale.mac.match(/.{0,2}/g).join(":").slice(0, -1) : "N/A";
   const deviceUserSettings = userData.devices[macKey];
-  const [percentThreshold, setPercentThreshold] = useState(deviceUserSettings.percentThreshold);
-  const [purchase, setPurchase] = useState(deviceUserSettings.purchase);
-  const [publishFrequency, setPublishFrequency] = useState(scale.publishFrequency);
   const lastPublished = new Date(scale.lastPublishedString);
   const now = new Date();
   // If no update for a day
   const online = (now - lastPublished) < 1000 * 3600 * 24; // milliseconds in second * seconds in hour * hours in day
+  const childRef = useRef();
 
   // Setup listener for when current weight of device changes
   useEffect(() => {
-    let currentWeightRef = fire.database().ref(debug + '/devices/' + macKey + '/currentWeight')
+    let currentWeightRef = fire.database().ref(debug + '/devices/' + macKey + '/')
     currentWeightRef.on('value', (snapshot) => {
-      console.log('hi')
       dispatch(getDevices());
     });
   }, []);
 
+  // Setup listener for when current weight of device changes
+  useEffect(() => {
+    setScale(allDevices[activeDeviceIndex]);
+  }, [allDevices, activeDeviceIndex]);
+
   const handleGoBack = () => {
+    const { percentThreshold, purchase, publishFrequency } = childRef.current.getData();
     if(percentThreshold !== deviceUserSettings.percentThreshold || purchase !== deviceUserSettings.purchase) {
       let newUser = {...userData};
       newUser.devices[macKey].percentThreshold = percentThreshold;
@@ -59,9 +65,11 @@ const Scale = (props) => {
       newScale.publishFrequency = publishFrequency;
       delete newScale.image;
       dispatch(setDeviceData(macKey, newScale));
+      updatePublishFrequency(macKey, publishFrequency);
     }
     navigation.goBack();
     dispatch(updateActiveScreen(prevScreen));
+    dispatch(updateActiveDeviceIndex(activeDeviceIndex));
   }
 
   const handleFactoryReset = () => {
@@ -72,14 +80,6 @@ const Scale = (props) => {
 
   const handleRefresh = () => {
     getWeight(macKey);
-  }
-
-  const handleSlider = (value) => {
-    setPercentThreshold(value);
-  }
-
-  const handleFrequencySlider = (value) => {
-    setPublishFrequency(value);
   }
 
   return (
@@ -97,7 +97,7 @@ const Scale = (props) => {
             padding={sizes.sm}
             paddingBottom={sizes.l}
             radius={sizes.cardRadius}
-            source={scale.image}>
+            source={image}>
             <Button
               row
               flex={0}
@@ -144,7 +144,7 @@ const Scale = (props) => {
               renderToHardwareTextureAndroid>
               <Block align="center" marginTop={10}>
                 <Text h5>{scale.currentWeight}</Text>
-                <Text>Current Weight (oz)</Text>
+                <Text align="center">Current Weight (grams)</Text>
               </Block>
               <Block align="center">
                 <Text h5>{scale.currentlySubscribed && scale.subscribedItem.name}</Text>
@@ -201,63 +201,18 @@ const Scale = (props) => {
           </Block>
           <Divider />
 
+          {/* profile: tare */}
+          <TareScale scale={scale} />
+
           {/* profile: calibration */}
           <Calibrate scale={scale} />
 
           {/* profile: device settings */}
-          <Block row align="center" justify="center" width="80%" alignSelf="center" marginTop={sizes.md}>
-            <Text h5 semibold align="center">
-              {'Device Settings'}
-            </Text>
-          </Block>
-          <Block row align="center" justify="center" width="80%" alignSelf="center" marginTop={sizes.md}>
-            <Block row wrap='wrap' justify='space-between' width="100%" marginTop={sizes.md}>
-              <Text p align="center" size={14}>Notify/Purchase: </Text>
-              <Switch
-                checked={purchase}
-                onPress={setPurchase}
-                inactiveFillColor={'black'}
-                activeFillColor={'black'}
-              />
-            </Block>
-          </Block>
-          <Block row align="center" justify="center" width="80%" alignSelf="center" marginTop={sizes.md}>
-            <Block row wrap='wrap' justify='space-between' width="100%" marginTop={sizes.md}>
-              <Text p align="center" size={14}>Purchase Threshold: </Text>
-              <Text p align="center" size={14}>{percentThreshold.toFixed(0)}%</Text>
-            </Block>
-          </Block>
-          <Block row justify='center' align="center" alignSelf='center' width="70%" marginTop={sizes.md}>
-            <Slider
-              style={{width: '100%'}}
-              minimumValue={10}
-              maximumValue={50}
-              value={percentThreshold}
-              minimumTrackTintColor="#0dff4b"
-              maximumTrackTintColor="#000000"
-              onValueChange={handleSlider}
-              step={1}
-            />
-          </Block>
-          <Block row align="center" justify="center" width="80%" alignSelf="center" marginTop={sizes.md}>
-            <Block row wrap='wrap' justify='space-between' width="100%" marginTop={sizes.md}>
-              <Text p align="center" size={14}>Publish Frequency: </Text>
-              <Text p align="center" size={14}>{publishFrequency.toFixed(0)} hrs</Text>
-            </Block>
-          </Block>
-          <Block row justify='center' align="center" alignSelf='center' width="70%" marginTop={sizes.md}>
-            <Slider
-              style={{width: '100%'}}
-              minimumValue={1}
-              maximumValue={72}
-              value={publishFrequency}
-              minimumTrackTintColor="#0dff4b"
-              maximumTrackTintColor="#000000"
-              onValueChange={handleFrequencySlider}
-              step={1}
-            />
-          </Block>
-          <Divider />
+          <DeviceSettings 
+            ref={childRef}
+            deviceUserSettings={deviceUserSettings}
+            scale={scale}
+          />
 
           {/* profile: device details */}
           <Block row align="center" justify="center" width="80%" alignSelf="center" marginTop={sizes.md}>
@@ -267,7 +222,7 @@ const Scale = (props) => {
           </Block>
           <Block row align="center" alignSelf="center" width={"80%"} justify="space-between" marginVertical={sizes.sm}>
             <Text align="center">MAC Address:</Text>
-            <Text align="center">{scale.mac}</Text>
+            <Text align="center">{macString}</Text>
           </Block>
           <Block row align="center" alignSelf="center" width={"80%"} justify="space-between" marginVertical={sizes.sm}>
             <Text align="center">Date Added:</Text>

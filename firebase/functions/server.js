@@ -32,12 +32,18 @@ stripe.use(getDefault);
 const { 
   deleteDevice,
   getCurrentWeight,
+  calibrate,
+  updatePublishFrequency,
+  tare,
 } = require('./scale');
 
 // Create an Express object and routes (in order)
 const scale = express();
 scale.use('/deleteDevice', deleteDevice);
 scale.use('/getCurrentWeight', getCurrentWeight);
+scale.use('/calibrate', calibrate);
+scale.use('/updatePublishFrequency', updatePublishFrequency);
+scale.use('/tare', tare);
 scale.use(getDefault);
 
 

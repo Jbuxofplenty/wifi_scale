@@ -4,6 +4,7 @@ import {
   DATA_ACTIVE_SCREEN_UPDATE,
   DATA_UPDATE_PRODUCTS,
   DATA_UPDATE_DEVICES,
+  DATA_UPDATE_DEVICE_INDEX,
 } from '../constants/data';
 
 import { 
@@ -25,6 +26,11 @@ export const updatePrevScreen = (prevScreen) => ({
 export const updateActiveScreen = (activeScreen) => ({
   type: DATA_ACTIVE_SCREEN_UPDATE,
   payload: activeScreen
+});
+
+export const updateActiveDeviceIndex = (activeDeviceIndex) => ({
+  type: DATA_UPDATE_DEVICE_INDEX,
+  payload: activeDeviceIndex
 });
 
 export const reset = () => ({

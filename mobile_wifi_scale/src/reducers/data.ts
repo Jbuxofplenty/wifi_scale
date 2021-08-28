@@ -4,13 +4,15 @@ import {
   DATA_ACTIVE_SCREEN_UPDATE,
   DATA_UPDATE_PRODUCTS,
   DATA_UPDATE_DEVICES,
+  DATA_UPDATE_DEVICE_INDEX,
 } from '../constants/data';
 
 const INITIAL_STATE = {
-  prevScreen: 'Home',
-  activeScreen: 'Home',
+  prevScreen: 'Products',
+  activeScreen: 'Products',
   products: [],
   devices: [],
+  activeDeviceIndex: 0,
 };
 
 export default function (state = INITIAL_STATE, action) {
@@ -18,6 +20,13 @@ export default function (state = INITIAL_STATE, action) {
     case DATA_RESET: {
       return {
         ...INITIAL_STATE,
+      };
+    }
+
+    case DATA_UPDATE_DEVICE_INDEX: {
+      return {
+        ...state,
+        activeDeviceIndex: action.payload,
       };
     }
 

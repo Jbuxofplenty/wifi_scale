@@ -18,7 +18,7 @@ import { updatePrevScreen, updateActiveScreen } from '../actions/data';
 const Drawer = createDrawerNavigator();
 
 /* drawer menu screens navigation */
-const ScreensStack = () => {
+const ScreensStack = ({ isLoggedIn }) => {
   const {colors} = useTheme();
   const isDrawerOpen = useIsDrawerOpen();
   const animation = useRef(new Animated.Value(0)).current;
@@ -58,7 +58,7 @@ const ScreensStack = () => {
         },
       ])}>
       {/*  */}
-      <Screens />
+      <Screens isLoggedIn={isLoggedIn} />
     </Animated.View>
   );
 };
@@ -93,7 +93,6 @@ const DrawerContent = (
     {name: t('screens.profile'), to: 'Profile', icon: assets.profile},
   ] :
   [
-    {name: t('screens.home'), to: 'Home', icon: assets.home},
     {name: t('screens.products'), to: 'Products', icon: assets.articles},
     {name: t('screens.register'), to: 'Register', icon: assets.register},
   ];
@@ -182,7 +181,9 @@ export default (props) => {
           borderRightWidth: 0,
           backgroundColor: 'transparent',
         }}>
-        <Drawer.Screen name="Screens" component={ScreensStack} />
+        <Drawer.Screen name="Screens">
+          {props => <ScreensStack isLoggedIn={isLoggedIn} />}
+        </Drawer.Screen>
       </Drawer.Navigator>
     </Block>
   );

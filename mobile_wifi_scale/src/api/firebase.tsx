@@ -9,11 +9,11 @@ import "firebase/database";
 //import "firebase/storage";
 import * as GoogleAuthentication from 'expo-google-app-auth';
 
-import Debug from '../constants/debug';
+import { DEBUG } from '../constants/debug';
 import apiKeys from '../config/keys';
 
 let debug = "";
-if(Debug.DEBUG) {
+if(DEBUG) {
   debug = "/development/";
 }
 
@@ -94,6 +94,60 @@ export async function getWeight(macAddress) {
   let url = baseUrl + '/scale/getCurrentWeight';
   console.log(url, macAddress)
   let data = { macAddress };
+  await axios({
+    method: 'post',
+    url,
+    data,
+    responseType: 'text'
+  })
+  .then(function (response) {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error);
+  });
+}
+
+export async function tareScale(macAddress) {
+  let url = baseUrl + '/scale/tare';
+  console.log(url, macAddress)
+  let data = { macAddress };
+  await axios({
+    method: 'post',
+    url,
+    data,
+    responseType: 'text'
+  })
+  .then(function (response) {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error);
+  });
+}
+
+export async function calibrate(macAddress, calibrationWeight) {
+  let url = baseUrl + '/scale/calibrate';
+  console.log(url, macAddress, calibrationWeight)
+  let data = { macAddress, calibrationWeight };
+  await axios({
+    method: 'post',
+    url,
+    data,
+    responseType: 'text'
+  })
+  .then(function (response) {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error);
+  });
+}
+
+export async function updatePublishFrequency(macAddress, publishFrequency) {
+  let url = baseUrl + '/scale/updatePublishFrequency';
+  console.log(url, macAddress, publishFrequency)
+  let data = { macAddress, publishFrequency };
   await axios({
     method: 'post',
     url,

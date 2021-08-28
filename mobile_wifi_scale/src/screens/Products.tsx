@@ -19,7 +19,7 @@ const Products = () => {
     if(!allProducts.length) {
       dispatch(getProducts());
     }
-  }, []);
+  }, [allProducts]);
 
   // init articles
   useEffect(() => {

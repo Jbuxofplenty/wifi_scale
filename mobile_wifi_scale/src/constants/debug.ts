@@ -1,1 +1,1 @@
-module.exports.DEBUG = false;
+export const DEBUG = false;

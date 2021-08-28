@@ -11,8 +11,8 @@ import { IDevice } from '../constants/types';
 const Device = ({
   currentWeight,
   image,
-  datLastTared,
-  datLastTaredString,
+  dateLastTared,
+  dateLastTaredString,
   lastPublished,
   lastPublishedString,
   name,
@@ -65,12 +65,12 @@ const Device = ({
                   bold
                   align="center"
                   gradient={gradients.primary}>
-                  {currentWeight} oz
+                  {currentWeight} grams
                 </Text>
               </Block>
             </Block>
             <Text p gray>
-              {'Last Published on ' + dayjs(datLastTaredString).format('MM/DD H:MM A') || '-'}
+              {'Last Published on ' + dayjs(dateLastTaredString).format('MM/DD H:MM A') || '-'}
             </Text>
           </Block>
         </Image>
