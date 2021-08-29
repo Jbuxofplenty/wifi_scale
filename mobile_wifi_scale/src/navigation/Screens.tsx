@@ -1,7 +1,7 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import { Home, Purchase, Products, Profile, Register, SetupScale, Scale } from '../screens';
+import { Home, Purchase, Products, Profile, Register, SetupScale, Scale, CoffeeMaker } from '../screens';
 import { useScreenOptions } from '../hooks';
 
 const Stack = createStackNavigator();
@@ -40,6 +40,12 @@ export default ({ isLoggedIn }) => {
       <Stack.Screen
         name="Scale"
         component={Scale}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="Coffee Maker"
+        component={CoffeeMaker}
         options={{headerShown: false}}
       />
 

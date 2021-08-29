@@ -13,6 +13,7 @@ const defaultDevice = {
   lastPublished: Date.now(),
   name: "Wifi-Scale",
   lastPublishedString: new Date().toLocaleString("en-US", {timeZone: "America/New_York"}),
+  deviceType: "scale",
 }
 
 

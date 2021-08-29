@@ -4,8 +4,8 @@ import Slider from '@react-native-community/slider';
 import { Block, Text } from '../components/';
 import { useTheme } from '../hooks/';
 
-const SettingsSlider = ({ label, units, onChange, decimals, initValue, min, max }) => {
-  const { sizes, gradients } = useTheme();
+const SettingsSlider = ({ label, units, onChange, decimals, initValue, min, max, step=1 }) => {
+  const { sizes } = useTheme();
   const [settingValue, setSettingsValue] = useState(initValue);
 
   const handleSlider = (value) => {
@@ -24,7 +24,7 @@ const SettingsSlider = ({ label, units, onChange, decimals, initValue, min, max 
           minimumTrackTintColor="#0dff4b"
           maximumTrackTintColor="#000000"
           onValueChange={handleSlider}
-          step={1}
+          step={step}
         />
       </Block>
       <Block row align="center" justify="center" width="80%" alignSelf="center">

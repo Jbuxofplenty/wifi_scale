@@ -24,6 +24,7 @@ const defaultDevice = {
   currentlySubscribed: false,
   percentThreshold: 20,
   purchase: true,
+  deviceType: "scale"
 }
 
 const SetupScale = (props) => {

@@ -18,6 +18,9 @@ import Calibrate from './Calibrate';
 import SettingsSlider from './SettingsSlider';
 import DeviceSettings from './DeviceSettings';
 import TareScale from './TareScale';
+import CoffeeMakerCard from './CoffeeMakerCard';
+import CoffeeMakerSettings from './CoffeeMakerSettings';
+import CoffeeMakerHelpers from './CoffeeMakerHelpers';
 
 export {
   Block,
@@ -40,4 +43,7 @@ export {
   SettingsSlider,
   DeviceSettings,
   TareScale,
+  CoffeeMakerCard,
+  CoffeeMakerSettings,
+  CoffeeMakerHelpers,
 };

@@ -6,4 +6,5 @@ export {default as Register} from './Register';
 export {default as Purchase} from './Purchase';
 export {default as SetupScale} from './SetupScale';
 export {default as Scale} from './Scale';
+export {default as CoffeeMaker} from './CoffeeMaker';
 

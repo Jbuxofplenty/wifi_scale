@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { useTheme } from '../hooks';
 import { IDevice } from '../constants/types';
-import {Block, Button, Device, AddDevice} from '../components';
+import {Block, Device, AddDevice, CoffeeMakerCard } from '../components';
 import { updatePrevScreen, updateActiveScreen, getDevices, updateActiveDeviceIndex } from '../actions/data';
 
 
@@ -16,17 +16,21 @@ const Home = (props) => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const isLoggedIn = useSelector((state) => state.auth.userData ? true : false);
-  const activeDeviceIndex = useSelector((state) => state.data.activeDeviceIndex);
   const userDeviceData = useSelector((state) => isLoggedIn && state.auth.userData.devices ? state.auth.userData.devices : []);
   const allDevices = useSelector<IDevice[]>((state) => state.data ? state.data.devices : []);
-  const cardImages = [assets.card1, assets.card2, assets.card3, assets.card4];
+  const cardImages = [assets.card2, assets.card3, assets.card4];
   const isFocused = useIsFocused();
 
   const navigateScale = (item, index) => {
     dispatch(updatePrevScreen('Home'));
     dispatch(updateActiveScreen('Scale'));
     dispatch(updateActiveDeviceIndex(index));
-    navigation.navigate('Scale', {...item});
+    if(item.deviceType === 'scale') {
+      navigation.navigate('Scale', {...item});
+    }
+    else {
+      navigation.navigate('Coffee Maker', {...item});
+    }
   }
 
   useEffect(() => {
@@ -68,6 +72,7 @@ const Home = (props) => {
       navigation.navigate('Setup Scale');
     }
   }
+  console.log(devices);
 
   return (
     <Block>
@@ -77,7 +82,13 @@ const Home = (props) => {
         keyExtractor={(item) => `${item?.mac}`}
         style={{paddingHorizontal: sizes.padding}}
         contentContainerStyle={{paddingBottom: sizes.l}}
-        renderItem={({item, index}) => item.addDevice ? <AddDevice {...item} onPress={navigate} /> : <Device {...item} onPress={() => navigateScale({...item}, index)} />}
+        renderItem={({item, index}) => 
+          item.addDevice ? 
+            <AddDevice {...item} onPress={navigate} /> : 
+          item.deviceType === "scale" ?
+            <Device {...item} onPress={() => navigateScale({...item}, index)} /> :
+            <CoffeeMakerCard {...item} onPress={() => navigateScale({...item}, index)} /> 
+          }
       />
     </Block>
   );
