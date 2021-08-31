@@ -20,14 +20,19 @@ deleteDevice.use(express.urlencoded({ extended: true })) // for parsing applicat
 // Automatically allow cross-origin requests
 deleteDevice.use(cors({ origin: true }));
 
-deleteDevice.post('*', async (req, res) => {
+deleteDevice.post('*', async (req, res, next) => {
   const macAddress = req.body.macAddress;
   const uid = req.body.uid;
   console.log(macAddress, uid)
   await db.ref('/devices/' + macAddress).remove();
   await db.ref('/users/' + uid + '/devices/' + macAddress).remove();
-  await sendCommand(macAddress, "reset");
-  res.send({ type: 'success'});
+  sendCommand(macAddress, "reset")
+  .then(function () {
+    res.send({ type: 'success' });
+  })
+  .catch((error) => {
+    next(error);
+  });
 });
 
 /**
@@ -45,10 +50,15 @@ getCurrentWeight.use(express.urlencoded({ extended: true })) // for parsing appl
 // Automatically allow cross-origin requests
 getCurrentWeight.use(cors({ origin: true }));
 
-getCurrentWeight.post('*', async (req, res) => {
+getCurrentWeight.post('*', async (req, res, next) => {
   const macAddress = req.body.macAddress;
-  await sendCommand(macAddress, "getWeight");
-  res.send({ type: 'success'});
+  sendCommand(macAddress, "getWeight")
+  .then(function () {
+    res.send({ type: 'success' });
+  })
+  .catch((error) => {
+    next(error);
+  });
 });
 
 /**
@@ -67,12 +77,17 @@ calibrate.use(express.urlencoded({ extended: true })) // for parsing application
 // Automatically allow cross-origin requests
 calibrate.use(cors({ origin: true }));
 
-calibrate.post('*', async (req, res) => {
+calibrate.post('*', async (req, res, next) => {
   const macAddress = req.body.macAddress;
   const calibrationWeight = req.body.calibrationWeight;
   const command = "calibrate " + calibrationWeight.toString();
-  await sendCommand(macAddress, command);
-  res.send({ type: 'success'});
+  sendCommand(macAddress, command)
+  .then(function () {
+    res.send({ type: 'success' });
+  })
+  .catch((error) => {
+    next(error);
+  });
 });
 
 /**
@@ -91,12 +106,17 @@ updatePublishFrequency.use(express.urlencoded({ extended: true })) // for parsin
 // Automatically allow cross-origin requests
 updatePublishFrequency.use(cors({ origin: true }));
 
-updatePublishFrequency.post('*', async (req, res) => {
+updatePublishFrequency.post('*', async (req, res, next) => {
   const macAddress = req.body.macAddress;
   const publishFrequency = req.body.publishFrequency;
   const command = "publishFrequency " + publishFrequency.toString();
-  await sendCommand(macAddress, command);
-  res.send({ type: 'success'});
+  sendCommand(macAddress, command)
+  .then(function () {
+    res.send({ type: 'success' });
+  })
+  .catch((error) => {
+    next(error);
+  });
 });
 
 /**
@@ -114,11 +134,43 @@ tare.use(express.urlencoded({ extended: true })) // for parsing application/x-ww
 // Automatically allow cross-origin requests
 tare.use(cors({ origin: true }));
 
-tare.post('*', async (req, res) => {
+tare.post('*', async (req, res, next) => {
   const macAddress = req.body.macAddress;
   const command = "tare";
-  await sendCommand(macAddress, command);
-  res.send({ type: 'success'});
+  sendCommand(macAddress, command)
+  .then(function () {
+    res.send({ type: 'success' });
+  })
+  .catch((error) => {
+    next(error);
+  });
+});
+
+/**
+ * Send a command to a device to put the scale into "light" sleep mode (Wifi off and CPU off, only interupts wake it)
+ *
+ * All params are referenced from req.body
+ * @param {string} macAddress - The mac address of the microcontroller
+ */
+var sleep = express();
+
+// For production
+sleep.use(express.json()) // for parsing application/json
+sleep.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
+
+// Automatically allow cross-origin requests
+sleep.use(cors({ origin: true }));
+
+sleep.post('*', async (req, res, next) => {
+  const macAddress = req.body.macAddress;
+  const command = "sleep";
+  sendCommand(macAddress, command)
+  .then(function () {
+    res.send({ type: 'success' });
+  })
+  .catch((error) => {
+    next(error);
+  });
 });
 
 
@@ -128,4 +180,5 @@ module.exports = {
   calibrate,
   updatePublishFrequency,
   tare,
+  sleep,
 };

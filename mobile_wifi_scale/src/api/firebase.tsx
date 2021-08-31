@@ -75,8 +75,7 @@ export async function deleteDevice(macAddress) {
   var uid = firebase.auth().currentUser.uid;
   let url = baseUrl + '/scale/deleteDevice';
   let data = { macAddress, uid };
-  console.log(url)
-  await axios({
+  let deviceConnected = await axios({
     method: 'post',
     url,
     data,
@@ -84,17 +83,20 @@ export async function deleteDevice(macAddress) {
   })
   .then(function (response) {
     console.log(response.data);
+    return true;
   })
   .catch((error) => {
     console.error(error);
+    return false;
   });
+  return deviceConnected;
 }
 
 export async function getWeight(macAddress) {
   let url = baseUrl + '/scale/getCurrentWeight';
   console.log(url, macAddress)
   let data = { macAddress };
-  await axios({
+  let deviceConnected = await axios({
     method: 'post',
     url,
     data,
@@ -102,17 +104,41 @@ export async function getWeight(macAddress) {
   })
   .then(function (response) {
     console.log(response.data);
+    return true;
   })
   .catch((error) => {
     console.error(error);
+    return false;
   });
+  return deviceConnected;
+}
+
+export async function sleepScale(macAddress) {
+  let url = baseUrl + '/scale/sleep';
+  console.log(url, macAddress)
+  let data = { macAddress };
+  let deviceConnected = await axios({
+    method: 'post',
+    url,
+    data,
+    responseType: 'text'
+  })
+  .then(function (response) {
+    console.log(response.data);
+    return true;
+  })
+  .catch((error) => {
+    console.error(error);
+    return false;
+  });
+  return deviceConnected;
 }
 
 export async function tareScale(macAddress) {
   let url = baseUrl + '/scale/tare';
   console.log(url, macAddress)
   let data = { macAddress };
-  await axios({
+  let deviceConnected = await axios({
     method: 'post',
     url,
     data,
@@ -120,17 +146,20 @@ export async function tareScale(macAddress) {
   })
   .then(function (response) {
     console.log(response.data);
+    return true;
   })
   .catch((error) => {
     console.error(error);
+    return false;
   });
+  return deviceConnected;
 }
 
 export async function calibrate(macAddress, calibrationWeight) {
   let url = baseUrl + '/scale/calibrate';
   console.log(url, macAddress, calibrationWeight)
   let data = { macAddress, calibrationWeight };
-  await axios({
+  let deviceConnected = await axios({
     method: 'post',
     url,
     data,
@@ -138,17 +167,20 @@ export async function calibrate(macAddress, calibrationWeight) {
   })
   .then(function (response) {
     console.log(response.data);
+    return true;
   })
   .catch((error) => {
     console.error(error);
+    return false;
   });
+  return deviceConnected;
 }
 
 export async function updatePublishFrequency(macAddress, publishFrequency) {
   let url = baseUrl + '/scale/updatePublishFrequency';
   console.log(url, macAddress, publishFrequency)
   let data = { macAddress, publishFrequency };
-  await axios({
+  let deviceConnected = await axios({
     method: 'post',
     url,
     data,
@@ -156,10 +188,13 @@ export async function updatePublishFrequency(macAddress, publishFrequency) {
   })
   .then(function (response) {
     console.log(response.data);
+    return true;
   })
   .catch((error) => {
     console.error(error);
+    return false;
   });
+  return deviceConnected;
 }
 
 export async function updateDevice(deviceId, device) {

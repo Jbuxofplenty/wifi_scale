@@ -45,12 +45,18 @@ const Calibrate = (props) => {
   }
 
   const handleCalibrate = async () => {
-    calibrate(scale.mac, calibrationWeight);
-    await executeInterval("Remove all items from the scale so the scale can be tared...", 10);
-    await executeInterval("Getting the scale reading...", 5);
-    await executeInterval("Place " + calibrationWeight.toFixed(0).toString() + " grams on the scale so it can be calibrated...", 15);
-    await executeInterval("Getting the scale reading...", 5);
-    setMessage("Scale calibrated successfully!");
+    await executeInterval("Attempting to send command to device...", 1, false);
+    const received = await calibrate(scale.mac, calibrationWeight);
+    if(received) {
+      await executeInterval("Remove all items from the scale so the scale can be tared...", 10);
+      await executeInterval("Getting the scale reading...", 5);
+      await executeInterval("Place " + calibrationWeight.toFixed(0).toString() + " grams on the scale so it can be calibrated...", 15);
+      await executeInterval("Getting the scale reading...", 5);
+      setMessage("Scale calibrated successfully!");
+    }
+    else {
+      setMessage("Device not currently online!");
+    }
     setTimeout(() => { setMessage(""); }, 3000);
   }
 

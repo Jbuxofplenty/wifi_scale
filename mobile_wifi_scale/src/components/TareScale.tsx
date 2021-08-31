@@ -44,10 +44,17 @@ const TareScale = (props) => {
   }
 
   const handleTareScale = async () => {
-    tareScale(scale.mac);
-    await executeInterval("Place your container on the scale so the device can be tared...", 10);
-    await executeInterval("Getting the scale reading...", 5);
-    setMessage("Scale tared successfully!");
+    await executeInterval("Attempting to send command to device...", 1, false);
+    const received = await tareScale(scale.mac);
+    if(received) {
+      await executeInterval("Place your container on the scale so the device can be tared...", 10);
+      await executeInterval("Getting the scale reading...", 5);
+      setMessage("Scale tared successfully!");
+    }
+    else {
+      setInProgress(false);
+      setMessage("Device not currently online!")
+    }
     setTimeout(() => { setMessage(""); }, 3000);
   }
 
@@ -65,31 +72,23 @@ const TareScale = (props) => {
   )
 
   return (
-    <>
-      <Block row align="center" justify="center" width="80%" alignSelf="center" marginTop={sizes.md}>
-        <Text h5 semibold align="center">
-          {'Tare Scale'}
-        </Text>
-      </Block>
-      <Block row align="center" justify="center" alignSelf="center" marginVertical={sizes.md}>
-        {inProgress || message !== "" ?
-          renderTareSteps() :
-          <Block justify='center' align="center" alignSelf='center' width="70%">
-            <Button
-              onPress={handleTareScale}
-              width="50%"
-              marginVertical={sizes.s}
-              marginHorizontal={sizes.sm}
-              gradient={gradients.info}>
-              <Text bold white transform="uppercase">
-                {'Tare now'}
-              </Text>
-            </Button>
-          </Block>
-        }
-      </Block>
-      <Divider />
-    </>
+    <Block row align="center" justify="center" alignSelf="center" marginVertical={sizes.md}>
+      {inProgress || message !== "" ?
+        renderTareSteps() :
+        <Block justify='center' align="center" alignSelf='center' width="70%">
+          <Button
+            onPress={handleTareScale}
+            width="50%"
+            marginVertical={sizes.s}
+            marginHorizontal={sizes.sm}
+            gradient={gradients.info}>
+            <Text bold white transform="uppercase">
+              {'Tare Scale'}
+            </Text>
+          </Button>
+        </Block>
+      }
+    </Block>
   );
 };
 

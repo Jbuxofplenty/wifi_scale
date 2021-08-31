@@ -10,7 +10,7 @@ import { updateActiveScreen } from '../actions/data';
 import { IDevice } from '../constants/types';
 import { setUserData } from '../actions/auth';
 import { setDeviceData, removeDevice, getDevices, updateActiveDeviceIndex } from '../actions/data';
-import { fire, getWeight, updatePublishFrequency } from '../api/firebase';
+import { fire, getWeight, updatePublishFrequency, sleepScale } from '../api/firebase';
 import { DEBUG } from '../constants/debug';
 
 const isAndroid = Platform.OS === 'android';
@@ -36,14 +36,14 @@ const Scale = (props) => {
   const lastPublished = new Date(scale.lastPublishedString);
   const now = new Date();
   // If no update for a day
-  const online = (now - lastPublished) < 1000 * 3600 * 24; // milliseconds in second * seconds in hour * hours in day
+  const [online, setOnline] = useState((now - lastPublished) < 1000 * 3600 * 24); // milliseconds in second * seconds in hour * hours in day
   const childRef = useRef();
 
   // Setup listener for when current weight of device changes
   useEffect(() => {
     let currentWeightRef = fire.database().ref(debug + '/devices/' + macKey + '/')
     currentWeightRef.on('value', (snapshot) => {
-      dispatch(getDevices());
+      setTimeout(() => { dispatch(getDevices()); }, 1000);
     });
   }, []);
 
@@ -78,8 +78,14 @@ const Scale = (props) => {
     dispatch(removeDevice(macKey));
   }
 
-  const handleRefresh = () => {
-    getWeight(macKey);
+  const handleRefresh = async () => {
+    let deviceConnected = await getWeight(macKey);
+    setOnline(deviceConnected);
+  }
+
+  const handleSleep = async () => {
+    await sleepScale(macKey);
+    setOnline(false);
   }
 
   return (
@@ -201,7 +207,26 @@ const Scale = (props) => {
           </Block>
           <Divider />
 
-          {/* profile: tare */}
+          {/* functions */}
+          <Block row align="center" justify="center" width="80%" alignSelf="center" marginTop={sizes.md}>
+            <Text h5 semibold align="center">
+              {'Functions'}
+            </Text>
+          </Block>
+          <Block flex={0} align="center" marginTop={sizes.sm}>
+            <Block align="center" width="50%">
+              <Button
+                onPress={handleSleep}
+                width="100%"
+                marginVertical={sizes.s}
+                marginHorizontal={sizes.md}
+                gradient={gradients.success}>
+                <Text bold white transform="uppercase">
+                  {'Sleep'}
+                </Text>
+              </Button>
+            </Block>
+          </Block>
           <TareScale scale={scale} />
 
           {/* profile: calibration */}

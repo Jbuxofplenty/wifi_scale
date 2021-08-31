@@ -35,6 +35,7 @@ const {
   calibrate,
   updatePublishFrequency,
   tare,
+  sleep,
 } = require('./scale');
 
 // Create an Express object and routes (in order)
@@ -44,6 +45,7 @@ scale.use('/getCurrentWeight', getCurrentWeight);
 scale.use('/calibrate', calibrate);
 scale.use('/updatePublishFrequency', updatePublishFrequency);
 scale.use('/tare', tare);
+scale.use('/sleep', sleep);
 scale.use(getDefault);
 
 

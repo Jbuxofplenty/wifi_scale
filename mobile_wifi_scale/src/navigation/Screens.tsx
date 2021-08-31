@@ -11,13 +11,11 @@ export default ({ isLoggedIn }) => {
   return (
     <Stack.Navigator screenOptions={screenOptions.stack}>
 
-      {isLoggedIn &&
-        <Stack.Screen
-          name="Home"
-          component={Home}
-          options={{title: 'Home'}}
-        />
-      }
+      <Stack.Screen
+        name="Home"
+        component={Home}
+        options={{title: 'Home'}}
+      />
       
       <Stack.Screen
         name="Products"

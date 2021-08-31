@@ -33,8 +33,7 @@ async function sendCommand(deviceId, commandMessage) {
     binaryData: binaryData,
   };
 
-  const [response] = await iotClient.sendCommandToDevice(request);
-  console.log('Sent command: ', response);
+  return iotClient.sendCommandToDevice(request);
 }
 
 

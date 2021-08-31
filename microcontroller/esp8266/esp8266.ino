@@ -1,13 +1,22 @@
 
 #include <ESP8266WiFi.h>
 #include <strings_en.h>
-#include <WiFiManager.h>
+#include <WiFiManager.h> 
+
+extern "C" {
+#include "gpio.h"
+}
+extern "C" {
+#include "user_interface.h"
+}
 
 // User built libs must be included after system libs
+// NOTE: Order dependent
 #include "esp8266_mqtt.h"
 #include "wifi.h"
 #include "hx711.h"
 #include "util.h"
+#include "push_button.h"
 
 WiFiManager wifiManager;
 float publishFrequency = 1;
@@ -45,20 +54,23 @@ void messageReceived(String &topic, String &payload) {
   else if(payload == "tare") {
     tareScale();
   }
+  else if(payload == "sleep") {
+    ESP.reset();
+  }
   else {
     Serial.println("Unrecognized Command: " + payload);
   }
 }
 
-int inPin = 13;   // choose the input pin (for a pushbutton)
-int val = 0;     // variable for reading the pin status
 void setup() {  
-  pinMode(inPin, INPUT);    // declare push button as input
   // Serial connection setup
   Serial.begin(115200);
+  gpio_init();
 
   // Setup scale
   scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
+  scale.set_scale(LOADCELL_DIVIDER);
+  scale.set_offset(LOADCELL_OFFSET);
 
   // Wifi manager setup
   Serial.println("Starting WifiManager with SSID=WifiScale");
@@ -67,20 +79,24 @@ void setup() {
   delay(1000);
   pinMode(LED_BUILTIN, OUTPUT);
   setupCloudIoT();
+  sleepNow();
 }
 
 unsigned long lastHours = 0;
 void loop() {
-  mqtt->loop();
-  delay(10);  // <- fixes some issues with WiFi stability
+  if(WiFi.status() == WL_CONNECTED) {
+    mqtt->loop();
+    delay(10);  // <- fixes some issues with WiFi stability
+    
+    if (!mqttClient->connected()) {
+      connect();
+    }
 
-  if (!mqttClient->connected()) {
-    connect();
+    // publish a message roughly every second.
+    if (hours() - lastHours > publishFrequency) {
+      lastHours = hours();
+      getWeight();
+    }
   }
-
-  // publish a message roughly every second.
-  if (hours() - lastHours > publishFrequency) {
-    lastHours = hours();
-    getWeight();
-  }
+  delay(1000);
 }

@@ -1,26 +1,27 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { Animated, Linking, StyleSheet } from 'react-native';
-
 import {
-  useIsDrawerOpen,
+  useDrawerStatus,
   createDrawerNavigator,
   DrawerContentComponentProps,
-  DrawerContentOptions,
   DrawerContentScrollView,
 } from '@react-navigation/drawer';
 import { useSelector, useDispatch } from 'react-redux';
+import * as RootNavigation from './RootNavigation';
 
 import Screens from './Screens';
 import { Block, Text, Switch, Button, Image } from '../components';
 import { useTheme, useTranslation } from '../hooks';
 import { updatePrevScreen, updateActiveScreen } from '../actions/data';
+import { loggedIn, loggedOut, getUserData } from '../actions/auth';
+import { fire } from '../api/firebase';
 
 const Drawer = createDrawerNavigator();
 
 /* drawer menu screens navigation */
 const ScreensStack = ({ isLoggedIn }) => {
   const {colors} = useTheme();
-  const isDrawerOpen = useIsDrawerOpen();
+  const isDrawerOpen = useDrawerStatus();
   const animation = useRef(new Animated.Value(0)).current;
 
   const scale = animation.interpolate({
@@ -42,7 +43,7 @@ const ScreensStack = ({ isLoggedIn }) => {
     Animated.timing(animation, {
       duration: 200,
       useNativeDriver: true,
-      toValue: isDrawerOpen ? 1 : 0,
+      toValue: isDrawerOpen === "open" ? 1 : 0,
     }).start();
   }, [isDrawerOpen, animation]);
 
@@ -54,7 +55,7 @@ const ScreensStack = ({ isLoggedIn }) => {
           flex: 1,
           overflow: 'hidden',
           borderColor: colors.card,
-          borderWidth: isDrawerOpen ? 1 : 0,
+          borderWidth: isDrawerOpen === "open" ? 1 : 0,
         },
       ])}>
       {/*  */}
@@ -65,7 +66,7 @@ const ScreensStack = ({ isLoggedIn }) => {
 
 /* custom drawer menu */
 const DrawerContent = (
-  props: DrawerContentComponentProps<DrawerContentOptions>,
+  props: DrawerContentComponentProps,
 ) => {
   const {navigation, isLoggedIn} = props;
   const {t} = useTranslation();
@@ -164,22 +165,44 @@ const DrawerContent = (
 
 /* drawer menu navigation */
 export default (props) => {
-  const {gradients} = useTheme();
-  const {isLoggedIn} = props;
+  const { gradients } = useTheme();
+  const isLoggedIn = useSelector((state) => state.auth.userData ? true : false);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const unsubscribe = fire.auth().onAuthStateChanged((user) => { // detaching the listener
+      if (user) {
+        dispatch(loggedIn({user}));
+        if(!isLoggedIn) {
+          dispatch(getUserData());
+          dispatch(updatePrevScreen('Home'));
+          dispatch(updateActiveScreen('Home'));
+          RootNavigation.navigate('Home', {});
+        }
+      } else {
+        dispatch(loggedOut());
+      }
+    });
+    return () => unsubscribe(); // unsubscribing from the listener when the component is unmounting. 
+}, []);
 
   return (
     <Block gradient={gradients.light}>
       <Drawer.Navigator
-        drawerType="slide"
-        overlayColor="transparent"
-        sceneContainerStyle={{backgroundColor: 'transparent'}}
         drawerContent={(props) => <DrawerContent {...props} isLoggedIn={isLoggedIn} />}
         backBehavior={"history"}
-        drawerStyle={{
-          flex: 1,
-          width: '60%',
-          borderRightWidth: 0,
-          backgroundColor: 'transparent',
+        screenOptions={{
+          headerShown: false,
+          overlayColor: "transparent",
+          sceneContainerStyle: {
+            backgroundColor: 'transparent'
+          },
+          drawerStyle: {
+            flex: 1,
+            width: '60%',
+            borderRightWidth: 0,
+            backgroundColor: 'transparent',
+          }
         }}>
         <Drawer.Screen name="Screens">
           {props => <ScreensStack isLoggedIn={isLoggedIn} />}

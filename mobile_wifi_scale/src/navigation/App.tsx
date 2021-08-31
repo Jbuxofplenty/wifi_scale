@@ -1,33 +1,18 @@
 import React, {useEffect} from 'react';
-import {Platform, StatusBar, LogBox} from 'react-native';
-import {useFonts} from 'expo-font';
+import { Platform, StatusBar, LogBox } from 'react-native';
+import { useFonts } from 'expo-font';
 import AppLoading from 'expo-app-loading';
-import {NavigationContainer, DefaultTheme} from '@react-navigation/native';
-import {useSelector, useDispatch} from "react-redux";
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { navigationRef } from './RootNavigation';
 
 import Menu from './Menu';
-import {useData, ThemeProvider, TranslationProvider} from '../hooks';
-import {fire} from '../api/firebase';
-import {loggedIn, loggedOut} from '../actions/auth';
+import { useData, ThemeProvider, TranslationProvider } from '../hooks';
 
 LogBox.ignoreLogs(['Warning: ...']); // Ignore log notification by message
 LogBox.ignoreAllLogs();//Ignore all log notifications
 
 export default () => {
   const {isDark, theme, setTheme} = useData();
-  const isLoggedIn = useSelector((state) => state.auth.userData ? true : false);
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    const unsubscribe = fire.auth().onAuthStateChanged((user) => { // detaching the listener
-      if (user) {
-        dispatch(loggedIn({user}));
-      } else {
-        dispatch(loggedOut());
-      }
-    });
-    return () => unsubscribe(); // unsubscribing from the listener when the component is unmounting. 
-}, []);
 
   /* set the status bar based on isDark constant */
   useEffect(() => {
@@ -68,8 +53,8 @@ export default () => {
   return (
     <TranslationProvider>
       <ThemeProvider theme={theme} setTheme={setTheme}>
-        <NavigationContainer theme={navigationTheme}>
-          <Menu isLoggedIn={isLoggedIn} />
+        <NavigationContainer ref={navigationRef} theme={navigationTheme}>
+          <Menu />
         </NavigationContainer>
       </ThemeProvider>
     </TranslationProvider>

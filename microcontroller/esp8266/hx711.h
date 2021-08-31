@@ -16,8 +16,9 @@ const int LOADCELL_SCK_PIN = 5;
 HX711 scale;
 
 // Default values
-const long LOADCELL_OFFSET = 50682624;
-const long LOADCELL_DIVIDER = 5895655;
+// const long LOADCELL_OFFSET = 819655.33;
+const long LOADCELL_OFFSET = -815248.33;
+const long LOADCELL_DIVIDER = 189.45;
   
 //////////////////////////////////////////////////////////////////////////////////
 // End scale global variables
@@ -41,6 +42,8 @@ void calibrateScale(float calibration_weight) {
     float current_reading = scale.get_units(10);
     Serial.print("Before setting up scale: \t\t");
     Serial.println(current_reading, 1);	// print the average of 5 readings from the ADC minus tare weight (not set) divided
+    Serial.print("Scaling factor: \t\t");
+    Serial.println(current_reading/calibration_weight);
     scale.set_scale(current_reading/calibration_weight); // this value is obtained by calibrating the scale with known weights; see the README for details
 
     Serial.print("After setting up scale: \t\t");

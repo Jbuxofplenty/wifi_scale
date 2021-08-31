@@ -79,7 +79,7 @@ const Home = (props) => {
       <FlatList
         data={devices}
         showsVerticalScrollIndicator={false}
-        keyExtractor={(item) => `${item?.mac}`}
+        keyExtractor={(item, index) => `${index}`}
         style={{paddingHorizontal: sizes.padding}}
         contentContainerStyle={{paddingBottom: sizes.l}}
         renderItem={({item, index}) => 

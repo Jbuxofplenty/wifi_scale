@@ -31,7 +31,7 @@ export default () => {
     headerRightContainerStyle: {paddingRight: sizes.s},
     cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
     headerTitle: ({children}: StackHeaderTitleProps) => (
-      <Text p>{children}</Text>
+      <Text p marginLeft={sizes.sm} >{children}</Text>
     ),
     headerLeft: () => (
       <Button onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}>
@@ -92,22 +92,6 @@ export default () => {
       headerTitle: () => (
         <Text p white>
           {t('navigation.components')}
-        </Text>
-      ),
-      headerRight: () => null,
-      headerLeft: () => (
-        <Button
-          onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}>
-          <Image source={icons.menu} radius={0} color={colors.white} />
-        </Button>
-      ),
-    },
-    pro: {
-      ...menu,
-      headerTransparent: true,
-      headerTitle: () => (
-        <Text p white semibold>
-          {t('pro.title')}
         </Text>
       ),
       headerRight: () => null,
