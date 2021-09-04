@@ -5,17 +5,17 @@
     "maxAgeSeconds": 3600
   },
   {
-    "origin": ["https://stemic-c4acc.web.app"],
+    "origin": ["https://wifi-scale-9b7b1.web.app"],
     "method": ["GET"],
     "maxAgeSeconds": 3600
   },
   {
-    "origin": ["https://www.stemicllc.com"],
+    "origin": ["https://www.weightedio.com"],
     "method": ["GET"],
     "maxAgeSeconds": 3600
   },
   {
-    "origin": ["https://stemicllc.com"],
+    "origin": ["https://weightedio.com"],
     "method": ["GET"],
     "maxAgeSeconds": 3600
   }

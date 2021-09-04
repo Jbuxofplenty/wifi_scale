@@ -50,7 +50,6 @@ async function registerDevice(deviceId) {
 async function updateWeight(deviceId, currentWeight) {
   let lastPublished = Date.now();
   let lastPublishedString = new Date().toLocaleString("en-US", {timeZone: "America/New_York"});
-  if(currentWeight < 0) currentWeight = 0;
   await db.ref('/devices/' + deviceId).update({ lastPublished });
   await db.ref('/devices/' + deviceId).update({ lastPublishedString });
   return db.ref('/devices/' + deviceId).update({ currentWeight });

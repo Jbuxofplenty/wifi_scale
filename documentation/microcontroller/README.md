@@ -13,9 +13,10 @@ Register the device using the keys you generated:
 
     gcloud iot devices create <DEVICE_NAME> --region=us-central1 \
         --registry=wifi-scale-registry \
-        --public-key path=public-key.pem,type=es256
+        --public-key path=ec_public.pem,type=es256
 
 - Note: ran into a lot of issues trying to re-add a device with the same public key as another deleted device (gave weird x.509 certificate errors that didn't reference the true problem.  Needed to delete the registry and re-add it.)
+- In order to retrieve the MAC address, you will need to upload the program to the microcontroller and connect to the WifiScale SSID with a computer.  Then navigate to `http://192.168.4.1/info` in your browser and look for the `Station MAC` field
 
 ## Microcontroller program
 

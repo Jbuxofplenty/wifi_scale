@@ -125,7 +125,6 @@ class Header extends React.PureComponent {
                 this.phoneClick(e, this.state.phoneOpen, '/', true);
               }}
             >
-              <img className="logo-img" alt="img" height="40" src="https://firebasestorage.googleapis.com/v0/b/stemic-c4acc.appspot.com/o/logo_no_background_header.png?alt=media&token=78547f91-89b5-41ee-adcd-8f775ca39d69" />
             </Link>
           </TweenOne>
           {

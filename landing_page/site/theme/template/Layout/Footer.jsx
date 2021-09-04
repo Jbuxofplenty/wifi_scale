@@ -10,7 +10,7 @@ class Footer extends React.PureComponent {
           {' '}
           {1900 + new Date().getYear()}
           {' '}
-          STEMIC LLC
+          Weighted.io
         </div>
       </footer>
     );

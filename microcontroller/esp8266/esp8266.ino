@@ -55,7 +55,7 @@ void messageReceived(String &topic, String &payload) {
     tareScale();
   }
   else if(payload == "sleep") {
-    ESP.reset();
+    sleepNow();
   }
   else {
     Serial.println("Unrecognized Command: " + payload);
@@ -79,7 +79,6 @@ void setup() {
   delay(1000);
   pinMode(LED_BUILTIN, OUTPUT);
   setupCloudIoT();
-  sleepNow();
 }
 
 unsigned long lastHours = 0;

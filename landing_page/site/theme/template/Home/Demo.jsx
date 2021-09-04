@@ -15,7 +15,7 @@ export default class Demo extends React.PureComponent {
   };
 
   static defaultProps = {
-    image: 'https://firebasestorage.googleapis.com/v0/b/stemic-c4acc.appspot.com/o/s_logo.png?alt=media&token=444e72f3-bd40-4990-92a9-115796d3d285',
+    image: 'https://firebasestorage.googleapis.com/v0/b/wifi-scale-9b7b1.appspot.com/o/pngegg.png?alt=media&token=c41c9e3f-0eb7-445b-b558-7b5ea496e8cd',
   };
 
   constructor(props) {
@@ -24,8 +24,8 @@ export default class Demo extends React.PureComponent {
     this.interval = null;
     this.gather = true;
     this.intervalTime = 9000;
-    this.width = 265;
-    this.height = 290;
+    this.width = 410;
+    this.height = 307;
     this.tickerOut = null;
     this.scale = 1;
   }
@@ -57,7 +57,7 @@ export default class Demo extends React.PureComponent {
 
   setDataToDom(data, w, h) {
     this.pointArray = [];
-    const number = Math.round(w / 11);
+    const number = Math.round(w / 20);
     for (let i = 0; i < w; i += number) {
       for (let j = 0; j < h; j += number) {
         if (data[((i + j * w) * 4) + 3] > 150) {

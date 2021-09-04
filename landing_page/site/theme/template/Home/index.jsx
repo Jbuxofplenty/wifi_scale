@@ -30,7 +30,7 @@ class Home extends React.PureComponent {
     const { pathname } = this.props.location;
     const isZhCN = utils.isZhCN(pathname);
     return (
-      <DocumentTitle title="STEMIC">
+      <DocumentTitle title="Weighted.io">
         <div className="home-wrapper">
           <div className="nav-wrapper">
             <ScrollLink to="banner" showHeightActive={['100%', '30%']} toHash={false} />

@@ -18,7 +18,7 @@ void sleepNow() {
   wifi_station_disconnect();
   wifi_set_opmode(NULL_MODE);
   wifi_fpm_set_sleep_type(LIGHT_SLEEP_T); //light sleep mode
-  gpio_pin_wakeup_enable(GPIO_ID_PIN(13), GPIO_PIN_INTR_LOLEVEL); 
+  gpio_pin_wakeup_enable(GPIO_ID_PIN(13), GPIO_PIN_INTR_HILEVEL); 
   wifi_fpm_open();
   delay(100);
   wifi_fpm_set_wakeup_cb(wakeupFromMotion); //wakeup callback

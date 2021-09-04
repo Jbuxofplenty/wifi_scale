@@ -157,7 +157,6 @@ export async function tareScale(macAddress) {
 
 export async function calibrate(macAddress, calibrationWeight) {
   let url = baseUrl + '/scale/calibrate';
-  console.log(url, macAddress, calibrationWeight)
   let data = { macAddress, calibrationWeight };
   let deviceConnected = await axios({
     method: 'post',

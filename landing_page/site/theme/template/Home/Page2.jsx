@@ -11,21 +11,21 @@ import * as utils from '../utils';
 
 const exhibition = {
   1: {
-    title: 'mafrey',
+    title: 'adam',
     meta: {
-      image: 'https://firebasestorage.googleapis.com/v0/b/stemic-c4acc.appspot.com/o/mafrey.jpeg?alt=media&token=4c2cfb33-1279-4be7-8485-de2483498dba',
+      image: 'https://firebasestorage.googleapis.com/v0/b/wifi-scale-9b7b1.appspot.com/o/adam.jpeg?alt=media&token=afb9afe4-d760-4000-b7d2-1769d084b965',
       filename: '',
       order: 2,
-      content: 'Matt Frey\n\nFounder & Managing Partner',
+      content: 'Adam Winchell\n\nFounder & Algorithms Guru',
     },
   },
   2: {
-    title: 'jadro',
+    title: 'josiah',
     meta: {
-      image: 'https://firebasestorage.googleapis.com/v0/b/stemic-c4acc.appspot.com/o/jadro.jpg?alt=media&token=35834129-5447-49df-a900-9138b8203e8e',
+      image: 'https://firebasestorage.googleapis.com/v0/b/wifi-scale-9b7b1.appspot.com/o/josiah_buxton.jpg?alt=media&token=a0502a79-6889-4647-9dde-bf42ee439b0f',
       filename: 'test',
       order: 1,
-      content: 'Matt Jadro\n\nPartner & Co-Founder',
+      content: 'Josiah Buxton\n\nFounder & Chief Architect',
     },
   },
 };

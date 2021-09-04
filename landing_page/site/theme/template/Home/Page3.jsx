@@ -52,11 +52,11 @@ export default class Page3 extends React.PureComponent {
             <h1 key="h1"><FormattedMessage id="app.home.page3.title" /></h1>
             <p>
               Email:
-              <a className="page3-link" href="mailto:frey@stemicllc.com">  frey@stemicllc.com</a>
+              <a className="page3-link" href="mailto:jbuxofplenty@gmail.com">  jbuxofplenty@gmail.com</a>
             </p>
             <p>
               Phone:
-              <a className="page3-link" href="tel:610-742-1777">  (610) 742-1777</a>
+              <a className="page3-link" href="tel:717-327-6896">  (717) 327-6896</a>
             </p>
           </QueueAnim>
         </OverPack>
