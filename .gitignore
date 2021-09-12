@@ -6,10 +6,19 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+# Environment specific data
+.expo
+.firebase
+.github
+
 # Sensitive data
 offline
 private-key.der
 mobile_wifi_scale/src/config/keys.tsx
+
+# locks
+yarn.lock
+package-lock.json
 
 # Backups
 mobile_wifi_scale.bak

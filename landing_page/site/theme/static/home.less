@@ -340,6 +340,9 @@
         border-radius: 6px;
         overflow: hidden;
         margin-bottom: 60px;
+        @media only screen and (max-width: 600px) {
+          height: 400px;
+        }
         &:nth-child(3n+2) {
           margin: 0 5%;
         }
@@ -350,6 +353,9 @@
           & .home-anim-demo-img {
             overflow: hidden;
             height: 500px;
+            @media only screen and (max-width: 600px) {
+              height: 300px;
+            }
           }
           & h2 {
             color: #666;
@@ -394,6 +400,24 @@
     }
     &-link {
       z-index: 100 !important;
+    }
+  }
+
+  .carousel {
+    width: 100%;
+    max-width: 100% !important;
+    overflow: hidden;
+    .home-anim-demo {
+      width: 100%;
+      margin-top: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      .carousel-container {
+        height: 700px;
+        width: 300px;
+        align-self: 'center';
+      }
     }
   }
 }

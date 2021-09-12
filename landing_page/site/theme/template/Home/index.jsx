@@ -8,6 +8,7 @@ import Banner from './Banner';
 import Page1 from './Page1';
 import Page2 from './Page2';
 import Page3 from './Page3';
+import MobileApp from './MobileApp';
 
 class Home extends React.PureComponent {
   static propTypes = {
@@ -35,7 +36,8 @@ class Home extends React.PureComponent {
           <div className="nav-wrapper">
             <ScrollLink to="banner" showHeightActive={['100%', '30%']} toHash={false} />
             <ScrollLink to="page1" showHeightActive="30%" toHash={false} />
-            <ScrollLink to="page2" showHeightActive={['30%', '70%']} toHash={false} />
+            <ScrollLink to="mobile-app" showHeightActive={['30%', '50%']} toHash={false} />
+            <ScrollLink to="page2" showHeightActive={['0%', '70%']} toHash={false} />
             <ScrollLink to="page3" showHeightActive="70%" toHash={false} />
           </div>
           <Banner {...this.props} isZhCN={isZhCN} />
@@ -45,6 +47,12 @@ class Home extends React.PureComponent {
             tweenAnim={this.tweenAnim}
             onButtonClick={this.scrollToTop}
             isZhCN={isZhCN}
+          />
+          <MobileApp
+            pageData={this.props.localizedPageData}
+            utils={this.props.utils}
+            tweenAnim={this.tweenAnim}
+            onButtonClick={this.scrollToTop}
           />
           <Page2
             pageData={this.props.localizedPageData}
